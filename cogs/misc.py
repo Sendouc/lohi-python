@@ -48,7 +48,7 @@ class MiscCog(commands.Cog):
             return await ctx.send(f'Roles available:\n{roles_string}')
 
         if role.name not in roles_available:
-            return await ctx.send('That role isn\'t available. Use `!give` to get a list of all the available roles.')
+            return await ctx.send('That role isn\'t available. Use `.give` to get a list of all the available roles.')
 
         if role in ctx.message.author.roles:
             await ctx.message.author.remove_roles(role)
@@ -63,7 +63,7 @@ class MiscCog(commands.Cog):
         """Gives or modifies a color role. Example usage: !color #6A7E25"""
 
         if not color:
-            return await ctx.send('Valid color not provided. Example usage: `!color #6A7E25`')
+            return await ctx.send('Valid color not provided. Example usage: `.color #6A7E25`')
 
         if not name:
             name = ctx.message.author.name
