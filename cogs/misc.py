@@ -59,14 +59,16 @@ class MiscCog(commands.Cog):
 
     @commands.command(name='color')
     @commands.check(can_create_color_roles)
-    async def give_or_edit_color_role(self, ctx, color : typing.Optional[discord.Color] = None, name : str = None):
+    async def give_or_edit_color_role(self, ctx, color : typing.Optional[discord.Color] = None, *args):
         """Gives or modifies a color role. Example usage: !color #6A7E25"""
 
         if not color:
             return await ctx.send('Valid color not provided. Example usage: `.color #6A7E25`')
 
-        if not name:
+        if len(args) == 0:
             name = ctx.message.author.name
+        else:
+            name = " ".join(args)
 
         if len(name) > 50:
             return await ctx.send(f'Max character count for the role to be given is 50. The name for the role you gave was {len(name)} characters long.')
