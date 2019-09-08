@@ -39,8 +39,10 @@ class AdminCog(commands.Cog, command_attrs=dict(hidden=True)):
         """Use git pull to update the bot. Courtesy of Lean."""
         import subprocess 
         with subprocess.Popen(["git",  "pull"], stdout=subprocess.PIPE, encoding="utf-8") as proc:
-            await ctx.send("```sh\n"+proc.stdout.read()+"```")
-        bot.close()
+            stdout_read = proc.stdout.read()
+            await ctx.send(f"```sh\n{stdout_read}```")
+        if "Already up to date." not in stdout_read:
+            await self.bot.close()
 
 def setup(bot):
     bot.add_cog(AdminCog(bot))
