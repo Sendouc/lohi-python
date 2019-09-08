@@ -74,7 +74,7 @@ class MiscCog(commands.Cog):
         for role in ctx.message.author.roles:
             if '!' in role.name:
                 await role.edit(name=f'{name}!', color=color)
-                return await ctx.send(f'Enjoy your new color, {ctx.message.author.name}!')
+                return await ctx.send(f'Edited the role, {ctx.message.author.name}!')
 
         created_role = await ctx.message.guild.create_role(name=f'{name}!', color=color)
         await ctx.message.author.add_roles(created_role)
