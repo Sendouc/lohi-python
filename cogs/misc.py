@@ -6,7 +6,7 @@ import typing
 from .utils import ids
 from .utils.lists import weapons, adjectives
 
-class MiscCog(commands.Cog):
+class MiscCog(commands.Cog, name="Misc"):
     def __init__(self, bot):
         self.bot = bot
     
@@ -42,7 +42,10 @@ class MiscCog(commands.Cog):
     @commands.command(name='give')
     @commands.check(is_in_sendou_server)
     async def give_or_remove_role(self, ctx, role : typing.Optional[discord.Role] = None):
-        """Gives or takes away a role (case sensitive). Use !give to view all the roles that are available."""
+        '''
+        Gives or takes away a role (case sensitive).
+        Use !give to view all the roles that are available.
+        '''
         roles_available = ['Tournament', 'Content', 'Jury']
 
         if not role:
@@ -63,7 +66,8 @@ class MiscCog(commands.Cog):
     @commands.check(can_create_color_roles)
     async def give_or_edit_color_role(self, ctx, color : typing.Optional[discord.Color] = None, *args):
         '''
-        Gives or modifies a color role. Example usage: !color #6A7E25
+        Gives or modifies a color role. 
+        Example usage: !color #6A7E25 my cool role name
         '''
         if not color:
             return await ctx.send('Valid color not provided. Example usage: `.color #6A7E25`')

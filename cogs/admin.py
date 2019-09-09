@@ -3,7 +3,7 @@ from discord.ext import commands
 
 from .utils import ids
 
-class AdminCog(commands.Cog, command_attrs=dict(hidden=True)):
+class AdminCog(commands.Cog, name="Admin", command_attrs=dict(hidden=True)):
     def __init__(self, bot):
         self.bot = bot
 
