@@ -33,7 +33,9 @@ class MiscCog(commands.Cog):
 
     @commands.command()
     async def ping(self, ctx):
-        """Bot's latency. Normally below 200ms."""
+        '''
+        Bot's latency. Normally below 200ms.
+        '''
         ping = round(self.bot.latency * 1000)
         await ctx.send(f'My ping is {ping}ms')
 
@@ -60,8 +62,9 @@ class MiscCog(commands.Cog):
     @commands.command(name='color')
     @commands.check(can_create_color_roles)
     async def give_or_edit_color_role(self, ctx, color : typing.Optional[discord.Color] = None, *args):
-        """Gives or modifies a color role. Example usage: !color #6A7E25"""
-
+        '''
+        Gives or modifies a color role. Example usage: !color #6A7E25
+        '''
         if not color:
             return await ctx.send('Valid color not provided. Example usage: `.color #6A7E25`')
 
@@ -84,7 +87,9 @@ class MiscCog(commands.Cog):
 
     @commands.command(name='whoami')
     async def tell_them_how_it_is(self, ctx):
-        "Learn something about yourself."
+        '''
+        Learn something about yourself.
+        '''
         did = ctx.message.author.id
         random.seed(did)
         adjective = random.choice(adjectives)

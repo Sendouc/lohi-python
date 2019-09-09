@@ -8,5 +8,5 @@ SENDOU_SERVER_ID = 407936403356516365
 PLUSONE_SERVER_ID = 351828612208525333
 
 # Channels
-                       # Sendou - #bot      +1 - #bot
+#                       Sendou - #bot      +1 - #bot
 WHITELISTED_CHANNELS = [53631291855654096, 616361732159569960]

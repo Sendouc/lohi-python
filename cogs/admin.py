@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-import requests
 
 from .utils import ids
 
@@ -9,13 +8,17 @@ class AdminCog(commands.Cog, command_attrs=dict(hidden=True)):
         self.bot = bot
 
     async def cog_check(self, ctx):
-        """ Check that makes sure nobody else but me uses the commands here. """
+        ''' 
+        Check that makes sure nobody else but me uses the commands here.
+        '''
         return ctx.message.author.id == ids.OWNER_ID
 
     @commands.command(name='removeall')
     async def remove_role_from_members(self, ctx, role: discord.Role):
-        """Takes the given role and removes it from all
-            members that have it."""
+        '''
+        Takes the given role and removes it from all
+        members that have it.
+        '''
         for member in role.members:
             await member.remove_roles(role)
         await ctx.send (f'All done with removing {role.name} from the users.')
@@ -24,8 +27,10 @@ class AdminCog(commands.Cog, command_attrs=dict(hidden=True)):
 
     @commands.command(name='r')
     async def reload_cog(self, ctx, *, cog):
-        """Command which Reloads a Module.
-        Remember to use dot path. e.g: cogs.owner"""
+        '''
+        Command which Reloads a Module.
+        Remember to use dot path. e.g: cogs.owner
+        '''
         try:
             self.bot.unload_extension(cog)
             self.bot.load_extension(cog)
@@ -36,7 +41,9 @@ class AdminCog(commands.Cog, command_attrs=dict(hidden=True)):
 
     @commands.command(name='update')
     async def update(self, ctx):
-        """Use git pull to update the bot. Courtesy of Lean."""
+        '''
+        Use git pull to update the bot. Courtesy of Lean.
+        '''
         import subprocess 
         with subprocess.Popen(["git",  "pull"], stdout=subprocess.PIPE, encoding="utf-8") as proc:
             stdout_read = proc.stdout.read()

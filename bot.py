@@ -20,12 +20,18 @@ async def on_ready():
 
 @bot.check
 async def check_if_channel_white_listed(ctx):
-    "Commands can only be used on white listed channels or DM's. The owner user can use them anywhere."
+    '''
+    Commands can only be used on white listed channels or DM's. 
+    The owner user can use them anywhere.
+    '''
     return ctx.message.author.id == ids.OWNER_ID or ctx.guild is None or ctx.message.channel.id in ids.WHITELISTED_CHANNELS
 
 @bot.event
 async def on_error(event, *args, **kwargs):
-	"If a command causes error a DM is sent to the owner with the stack trace and the user of the command is notified."
+	'''
+    If a command causes error a DM is sent to the owner with the stack trace 
+    and the user of the command is notified.
+    '''
 	# Gets the ctx object
 	context = args[0]
 	master_user = bot.get_user(ids.OWNER_ID)
