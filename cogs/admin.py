@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import requests
 
-from .utils import config
+from .utils import ids
 
 class AdminCog(commands.Cog, command_attrs=dict(hidden=True)):
     def __init__(self, bot):
@@ -10,7 +10,7 @@ class AdminCog(commands.Cog, command_attrs=dict(hidden=True)):
 
     async def cog_check(self, ctx):
         """ Check that makes sure nobody else but me uses the commands here. """
-        return ctx.message.author.id == config.OWNER_ID
+        return ctx.message.author.id == ids.OWNER_ID
 
     @commands.command(name='removeall')
     async def remove_role_from_members(self, ctx, role: discord.Role):

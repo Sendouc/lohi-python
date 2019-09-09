@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import traceback
 
-from cogs.utils import config
+from cogs.utils import config, ids
 
 INITIAL_EXTENSIONS = ['cogs.misc', 'cogs.admin']
 
@@ -21,16 +21,16 @@ async def on_ready():
 @bot.check
 async def check_if_channel_white_listed(ctx):
     "Commands can only be used on white listed channels or DM's. The owner user can use them anywhere."
-    return ctx.message.author.id == config.OWNER_ID or ctx.guild is None or ctx.message.channel.id in config.WHITELISTED_CHANNELS
+    return ctx.message.author.id == ids.OWNER_ID or ctx.guild is None or ctx.message.channel.id in ids.WHITELISTED_CHANNELS
 
 @bot.event
 async def on_error(event, *args, **kwargs):
 	"If a command causes error a DM is sent to the owner with the stack trace and the user of the command is notified."
 	# Gets the ctx object
 	context = args[0]
-	master_user = bot.get_user(config.OWNER_ID)
+	master_user = bot.get_user(ids.OWNER_ID)
 	if master_user is None:
-		master_user = await bot.fetch_user(config.OWNER_ID)
+		master_user = await bot.fetch_user(ids.OWNER_ID)
 	error_msg = f"```{traceback.format_exc()}```"
 	await master_user.send(f"Error caused by this message from {context.message.author}:\n"
 							f"```{context.message.content}```")

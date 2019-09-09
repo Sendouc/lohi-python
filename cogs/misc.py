@@ -3,7 +3,7 @@ from discord.ext import commands
 import random
 import typing
 
-from .utils import config
+from .utils import ids
 from .utils.lists import weapons, adjectives
 
 class MiscCog(commands.Cog):
@@ -11,17 +11,17 @@ class MiscCog(commands.Cog):
         self.bot = bot
     
     async def is_in_sendou_server(ctx):
-        can_be_sent = ctx.message.guild.id == config.SENDOU_SERVER_ID
+        can_be_sent = ctx.message.guild.id == ids.SENDOU_SERVER_ID
         if not can_be_sent:
             await ctx.send('This command can only be used in the "Sendou" server.')
         
         return can_be_sent
 
     async def can_create_color_roles(ctx):
-        if ctx.message.guild.id == config.PLUSONE_SERVER_ID:
+        if ctx.message.guild.id == ids.PLUSONE_SERVER_ID:
             return True
 
-        if ctx.message.guild.id == config.SENDOU_SERVER_ID:
+        if ctx.message.guild.id == ids.SENDOU_SERVER_ID:
             for role in ctx.message.author.roles:
                 if role.name in ["Twitch Subscriber", "Staff", "Nitro Booster"]:
                     return True
