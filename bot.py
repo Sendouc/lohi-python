@@ -2,9 +2,9 @@ import discord
 from discord.ext import commands
 import traceback
 
-from cogs.utils import config, ids
+from cogs.utils import config, ids, api
 
-INITIAL_EXTENSIONS = ['cogs.misc', 'cogs.admin']
+INITIAL_EXTENSIONS = ('cogs.splatoon', 'cogs.misc', 'cogs.admin')
 
 bot = commands.Bot(command_prefix='.', case_insensitive=True, guild_subscriptions=False, max_messages=None)
 
@@ -14,7 +14,8 @@ if __name__ == '__main__':
 
 @bot.event
 async def on_ready():
-    "http://discordpy.readthedocs.io/en/rewrite/api.html#discord.on_ready"
+    bot.api = api.ApiConnecter()
+    # http://discordpy.readthedocs.io/en/rewrite/api.html#discord.on_ready
     print(f'\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n')
     print(f'Successfully logged in and booted!')
 
