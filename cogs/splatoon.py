@@ -39,7 +39,7 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
         
         # If filter was so strict no rotations matching could be found
         if rotation_count == 4:
-            to_be_returned.append("No rotations found\n")
+            to_be_returned.append("No rotations found\n\n")
         
         return "".join(to_be_returned)
 
@@ -63,7 +63,7 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
                 f"map or mode {m} is referring to, {ctx.message.author.name}")
         rotation_data = await self.bot.api.get_rotation_data()
         if "Turf War" in ok_modes:
-            return await ctx.send("Adding Turf tomorrow lol")
+            return await ctx.send("Adding Turf tomorrow lol until then scrim Bunker Games hard")
         else:
             for mode in ok_modes:
                 to_be_said_parts.append(f"{mode}, ")
