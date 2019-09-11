@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+import time
 
 from .utils.lists import map_part_to_full, mode_part_to_full, modes_to_emoji
 
@@ -7,12 +8,49 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
     def __init__(self, bot):
         self.bot = bot
 
+    def get_rotation_lines(self, ok_maps: set, ok_modes: set, rotations: list) -> str:
+        game_mode = rotations[0]["game_mode"]["name"]
+        to_be_returned = [f"{modes_to_emoji[game_mode]} `{game_mode}`\n\n"]
+        rotation_count = 4
+        for r in rotations:
+            mode = r["rule"]["name"]
+            if mode not in ok_modes and len(ok_modes) != 0:
+                continue
+            map_1 = r["stage_a"]["name"]
+            map_2 = r["stage_b"]["name"]
+            if (map_1 not in ok_maps and map_2 not in ok_maps) and len(ok_maps) != 0:
+                continue
+
+            start_time = r["start_time"]
+            end_time = r["end_time"]
+            current_time = int(time.time())
+            if start_time < current_time:
+                time_in_seconds = end_time - current_time
+                time_string = time.strftime("**%#Hh%Mmin left**\n", time.gmtime(time_in_seconds))
+            else:
+                time_in_seconds = start_time - current_time
+                time_string = time.strftime("**In %#Hh%Mmin**\n", time.gmtime(time_in_seconds))
+            to_be_returned.append(time_string)
+
+            to_be_returned.append(f"{modes_to_emoji[mode]} {map_1} & {map_2}\n\n")
+            rotation_count -= 1
+            if rotation_count == 0:
+                break
+        
+        # If filter was so strict no rotations matching could be found
+        if rotation_count == 4:
+            to_be_returned.append("No rotations found\n")
+        
+        return "".join(to_be_returned)
+
     @commands.command(name='rot')
     async def display_rotation(self, ctx, *maps_or_modes):
         '''
         Displays the rotation with optional parameters to 
-        filter the result. Example usage:
+        filter the result. Example usage: .rot sz reef
+        Data provided by splatoon2.ink
         '''
+        to_be_said_parts = ["> Filters applied: "]
         ok_maps = set()
         ok_modes = set()
         for m in maps_or_modes:
@@ -21,15 +59,27 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             elif m.lower() in mode_part_to_full:
                 ok_modes.add(mode_part_to_full[m])
             else:
-                return await ctx.send(f"""Unfortunately I'm not sure 
-                what map or mode {m} is referring to, {ctx.message.author.name}""")
-
+                return await ctx.send("Unfortunately I'm not sure what" 
+                f"map or mode {m} is referring to, {ctx.message.author.name}")
+        rotation_data = await self.bot.api.get_rotation_data()
         if "Turf War" in ok_modes:
-            pass
+            return await ctx.send("Adding Turf tomorrow lol")
         else:
+            for mode in ok_modes:
+                to_be_said_parts.append(f"{mode}, ")
+            for stage in ok_maps:
+                to_be_said_parts.append(f"{stage}, ")
+                
+            if len(ok_maps) + len(ok_modes) == 0:
+                del to_be_said_parts[0]
+            else:
+                # Remove ", " from the last item
+                to_be_said_parts[-1] = to_be_said_parts[-1][:-2]
+            to_be_said_parts.append("\n")
+            to_be_said_parts.append(self.get_rotation_lines(ok_maps, ok_modes, rotation_data["gachi"]))
+            to_be_said_parts.append(self.get_rotation_lines(ok_maps, ok_modes, rotation_data["league"]))
 
-        
-
+        await ctx.send("".join(to_be_said_parts))
 
 def setup(bot):
     bot.add_cog(SplatoonCog(bot))
