@@ -63,7 +63,7 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
                 ok_modes.add(mode_part_to_full[m])
             else:
                 return await ctx.send("Unfortunately I'm not sure what" 
-                f"map or mode {m} is referring to, {ctx.message.author.name}")
+                f" map or mode '{m}' is referring to, {ctx.message.author.name}")
         rotation_data = await self.bot.api.get_rotation_data()
         if "Turf War" in ok_modes:
             return await ctx.send("Adding Turf tomorrow lol until then scrim Bunker Games hard")

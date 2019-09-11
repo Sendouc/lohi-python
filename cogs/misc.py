@@ -13,7 +13,7 @@ class MiscCog(commands.Cog, name="Misc"):
     async def is_in_sendou_server(ctx):
         can_be_sent = ctx.message.guild.id == ids.SENDOU_SERVER_ID
         if not can_be_sent:
-            await ctx.send('This command can only be used in the "Sendou" server.')
+            await ctx.send('This command can only be used in the "Sendou" server')
         
         return can_be_sent
 
@@ -25,10 +25,10 @@ class MiscCog(commands.Cog, name="Misc"):
             for role in ctx.message.author.roles:
                 if role.name in ["Twitch Subscriber", "Staff", "Nitro Booster"]:
                     return True
-            await ctx.send("This command can only be used by Twitch subscribers or Nitro Boosters.")
+            await ctx.send("This command can only be used by Twitch subscribers or Nitro Boosters")
             return False
 
-        await ctx.send("This command can't be used in this server.")
+        await ctx.send("This command can't be used in this server")
         return False
 
     @commands.command()
@@ -53,14 +53,14 @@ class MiscCog(commands.Cog, name="Misc"):
             return await ctx.send(f'Roles available:\n{roles_string}')
 
         if role.name not in roles_available:
-            return await ctx.send('That role isn\'t available. Use `.give` to get a list of all the available roles.')
+            return await ctx.send('That role isn\'t available. Use `.give` to get a list of all the available roles')
 
         if role in ctx.message.author.roles:
             await ctx.message.author.remove_roles(role)
-            return await ctx.send(f'{role.name} succesfully removed from {ctx.message.author.name}.')
+            return await ctx.send(f'{role.name} succesfully removed from {ctx.message.author.name}')
         
         await ctx.message.author.add_roles(role)
-        await ctx.send(f'{role.name} succesfully added to {ctx.message.author.name}.')
+        await ctx.send(f'{role.name} succesfully added to {ctx.message.author.name}')
 
     @commands.command(name='color')
     @commands.check(can_create_color_roles)
@@ -78,7 +78,7 @@ class MiscCog(commands.Cog, name="Misc"):
             name = " ".join(role_name)
 
         if len(name) > 50:
-            return await ctx.send(f'Max character count for the role to be given is 50. The name for the role you gave was {len(name)} characters long.')
+            return await ctx.send(f'Max character count for the role to be given is 50. The name for the role you gave was {len(name)} characters long')
 
         for role in ctx.message.author.roles:
             if '!' in role.name:
@@ -99,7 +99,7 @@ class MiscCog(commands.Cog, name="Misc"):
         adjective = random.choice(adjectives)
         random.seed(did)
         weapon = random.choice(weapons)
-        await ctx.send(f'{adjective.capitalize()} {weapon} main. That is who you are, {ctx.message.author.name}.')
+        await ctx.send(f'{adjective.capitalize()} {weapon} main. That is who you are, {ctx.message.author.name}')
 
 def setup(bot):
     bot.add_cog(MiscCog(bot))
