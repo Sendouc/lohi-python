@@ -24,6 +24,8 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             start_time = r["start_time"]
             end_time = r["end_time"]
             current_time = int(time.time())
+            if end_time < current_time:
+                continue
             if start_time < current_time:
                 time_in_seconds = end_time - current_time
                 # For it to work on Windows - needs to be replaced by #
