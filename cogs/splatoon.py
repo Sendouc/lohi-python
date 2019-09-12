@@ -57,10 +57,11 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
         ok_maps = set()
         ok_modes = set()
         for m in maps_or_modes:
-            if m.lower() in map_part_to_full:
-                ok_maps.add(map_part_to_full[m])
-            elif m.lower() in mode_part_to_full:
-                ok_modes.add(mode_part_to_full[m])
+            m_lower = m.lower()
+            if m_lower in map_part_to_full:
+                ok_maps.add(map_part_to_full[m_lower])
+            elif m_lower in mode_part_to_full:
+                ok_modes.add(mode_part_to_full[m_lower])
             else:
                 return await ctx.send("Unfortunately I'm not sure what" 
                 f" map or mode '{m}' is referring to, {ctx.message.author.name}")
