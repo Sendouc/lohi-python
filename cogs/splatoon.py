@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import time
 
-from .utils.lists import map_part_to_full, mode_part_to_full, modes_to_emoji
+from .utils.lists import map_part_to_full, mode_part_to_full, modes_to_emoji, weapons_to_emoji
 
 class SplatoonCog(commands.Cog, name="Splatoon"):
     def __init__(self, bot):
@@ -29,10 +29,10 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             if start_time < current_time:
                 time_in_seconds = end_time - current_time
                 # For it to work on Windows - needs to be replaced by #
-                time_string = time.strftime("**%-Hh%Mmin left**\n", time.gmtime(time_in_seconds))
+                time_string = time.strftime("**%-Hh %Mmin left**\n", time.gmtime(time_in_seconds))
             else:
                 time_in_seconds = start_time - current_time
-                time_string = time.strftime("**In %-Hh%Mmin**\n", time.gmtime(time_in_seconds))
+                time_string = time.strftime("**In %-Hh %Mmin**\n", time.gmtime(time_in_seconds))
             to_be_returned.append(time_string)
 
             to_be_returned.append(f"{modes_to_emoji[mode]} {map_1} & {map_2}\n\n")
@@ -84,6 +84,37 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             to_be_said_parts.append(self.get_rotation_lines(ok_maps, ok_modes, rotation_data["league"]))
 
         await ctx.send("".join(to_be_said_parts))
+
+    @commands.command(name='sr')
+    async def display_salmon_run_schedule(self, ctx):
+        '''
+        Displays the Salmon Run shift schedule.
+        Data provided by splatoon2.ink
+        '''
+        sr_data = await self.bot.api.get_salmon_run_data()
+        to_be_said = "<:grizz:622769856248283136> `Salmon Run`\n*All shifts last 12 hours*\n\n"
+        for rot in sr_data["details"]:
+            start_time = rot["start_time"]
+            end_time = rot["end_time"]
+            current_time = int(time.time())
+            if end_time < current_time:
+                continue
+            if start_time < current_time:
+                time_in_seconds = end_time - current_time
+                # For it to work on Windows - needs to be replaced by #
+                time_string = time.strftime("**%-Hh %Mmin left** \n", time.gmtime(time_in_seconds))
+            else:
+                time_in_seconds = start_time - current_time
+                time_string = time.strftime("**In %-Hh %Mmin** \n", time.gmtime(time_in_seconds))
+            to_be_said += time_string
+
+            for w in rot["weapons"]:
+                # TODO: Add the other kind of question mark
+                to_be_said += weapons_to_emoji.get(w["weapon"]["name"], "<:Unknown:611199200788611079>")
+            
+            to_be_said += f' {rot["stage"]["name"]}\n\n'
+
+        await ctx.send(to_be_said)
 
 def setup(bot):
     bot.add_cog(SplatoonCog(bot))
