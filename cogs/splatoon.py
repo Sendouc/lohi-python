@@ -92,7 +92,7 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
         Data provided by splatoon2.ink
         '''
         sr_data = await self.bot.api.get_salmon_run_data()
-        to_be_said = "<:grizz:622769856248283136> `Salmon Run`\n*All shifts last 12 hours*\n\n"
+        to_be_said = "<:grizz:622769856248283136> `Salmon Run`\n\n"
         for rot in sr_data["details"]:
             start_time = rot["start_time"]
             end_time = rot["end_time"]
@@ -102,10 +102,10 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             if start_time < current_time:
                 time_in_seconds = end_time - current_time
                 # For it to work on Windows - needs to be replaced by #
-                time_string = time.strftime("**%-Hh %Mmin left** \n", time.gmtime(time_in_seconds))
+                time_string = time.strftime("** %-d days %-H hours %M minutes left** \n", time.gmtime(time_in_seconds))
             else:
                 time_in_seconds = start_time - current_time
-                time_string = time.strftime("**In %-Hh %Mmin** \n", time.gmtime(time_in_seconds))
+                time_string = time.strftime("**In %-d days %-H hours %M minutes** \n", time.gmtime(time_in_seconds))
             to_be_said += time_string
 
             for w in rot["weapons"]:
