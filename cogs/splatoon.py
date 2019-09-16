@@ -29,10 +29,10 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             if start_time < current_time:
                 time_in_seconds = end_time - current_time
                 # For it to work on Windows - needs to be replaced by #
-                time_string = time.strftime("**%-Hh %Mmin left**\n", time.gmtime(time_in_seconds))
+                time_string = time.strftime("**%-Hh %-Mmin left**\n", time.gmtime(time_in_seconds))
             else:
                 time_in_seconds = start_time - current_time
-                time_string = time.strftime("**In %-Hh %Mmin**\n", time.gmtime(time_in_seconds))
+                time_string = time.strftime("**In %-Hh %-Mmin**\n", time.gmtime(time_in_seconds))
             to_be_returned.append(time_string)
 
             to_be_returned.append(f"{modes_to_emoji[mode]} {map_1} & {map_2}\n\n")
@@ -102,10 +102,10 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             if start_time < current_time:
                 time_in_seconds = end_time - current_time
                 # For it to work on Windows - needs to be replaced by #
-                time_string = time.strftime("** %-d days %-H hours %M minutes left** \n", time.gmtime(time_in_seconds))
+                time_string = time.strftime("** %-d days %-H hours %-M minutes left** \n", time.gmtime(time_in_seconds))
             else:
                 time_in_seconds = start_time - current_time
-                time_string = time.strftime("**In %-d days %-H hours %M minutes** \n", time.gmtime(time_in_seconds))
+                time_string = time.strftime("**In %-d days %-H hours %-M minutes** \n", time.gmtime(time_in_seconds))
             if "1 days" in time_string:
                 time_string = time_string.replace("days", "day")
             if " 1 hours" in time_string:
