@@ -107,11 +107,11 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
                 time_in_seconds = start_time - current_time
                 time_string = time.strftime("**In %-d days %-H hours %M minutes** \n", time.gmtime(time_in_seconds))
             if "1 days" in time_string:
-                time_string.replace("days", "day")
+                time_string = time_string.replace("days", "day")
             if "1 hours" in time_string:
-                time_string.replace("hours", "hour")
+                time_string = time_string.replace("hours", "hour")
             if "1 minutes" in time_string:
-                time_string.replace("minutes", "minute")
+                time_string = time_string.replace("minutes", "minute")
             to_be_said += time_string
 
             for w in rot["weapons"]:
