@@ -116,7 +116,10 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
 
             for w in rot["weapons"]:
                 # TODO: Add the other kind of question mark
-                to_be_said += weapons_to_emoji.get(w["weapon"]["name"], "<:Unknown:611199200788611079>")
+                if "weapon" in w:
+                    to_be_said += weapons_to_emoji.get(w["weapon"]["name"])
+                else:
+                    to_be_said += "<:Unknown:611199200788611079>"
             
             to_be_said += f' {rot["stage"]["name"]}\n\n'
 
