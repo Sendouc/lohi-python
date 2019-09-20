@@ -137,7 +137,7 @@ class MiscCog(commands.Cog, name="Misc"):
                         if user_id in ids_included:
                             break
                         user_name = e.title.split("User Suggestion: ")[1]
-                        to_be_said += f"{user_name} <{user_id}>\n"
+                        to_be_said += f"{user_name} [*] <{user_id}>\n"
 
         to_be_said += f"\n{len(plus_one.members)} members in the server ({excluded_from_voting} excluded from voting)"
         for msg in split_to_shorter_parts(to_be_said):
