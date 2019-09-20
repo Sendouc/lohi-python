@@ -6,7 +6,7 @@ from cogs.utils import config, ids, api
 
 INITIAL_EXTENSIONS = ('cogs.splatoon', 'cogs.misc', 'cogs.admin')
 
-bot = commands.Bot(command_prefix='.', case_insensitive=True, guild_subscriptions=False, max_messages=None)
+bot = commands.Bot(command_prefix='.', case_insensitive=True, max_messages=None)
 
 if __name__ == '__main__':
     for extension in INITIAL_EXTENSIONS:

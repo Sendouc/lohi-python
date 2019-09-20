@@ -5,13 +5,17 @@ import typing
 
 from .utils import ids
 from .utils.lists import weapons, adjectives
+from .utils.helper import split_to_shorter_parts
 
 class MiscCog(commands.Cog, name="Misc"):
     def __init__(self, bot):
         self.bot = bot
     
     async def is_in_sendou_server(ctx):
-        return ctx.message.guild.id == ids.SENDOU_SERVER_ID
+        return (ctx.message.guild and ctx.message.guild.id == ids.SENDOU_SERVER_ID) or ctx.message.author.id == ids.OWNER_ID
+    
+    async def is_in_plusone(ctx):
+        return (ctx.message.guild and ctx.message.guild.id == ids.PLUSONE_SERVER_ID) or ctx.message.author.id == ids.OWNER_ID
 
     async def can_create_color_roles(ctx):
         if ctx.message.guild.id == ids.PLUSONE_SERVER_ID:
@@ -82,6 +86,63 @@ class MiscCog(commands.Cog, name="Misc"):
         created_role = await ctx.message.guild.create_role(name=f'{name}!', color=color)
         await ctx.message.author.add_roles(created_role)
         await ctx.send(f'Enjoy your new color, {ctx.message.author.name}!')
+    
+    def discord_tag_or_nickname(self, member: discord.Member) -> str:
+        nickname = ids.ALIASES.get(member.id)
+        if nickname:
+            return f"{member} ({nickname}) <{member.id}>\n"
+        return f"{member} <{member.id}>\n"
+
+    @commands.command(name='plusone')
+    @commands.check(is_in_plusone)
+    async def display_members_for_voting(self, ctx):
+        '''
+        Displays the relevant members in +1 in a format
+        usable for voting.
+        '''
+        # TODO: Members not in order
+        SUGGEST_LIMIT = 11
+        to_be_said = "> Members\n"
+        plus_one = self.bot.get_guild(ids.PLUSONE_SERVER_ID)
+        excluded_from_voting = 0
+        vouches = []
+        ids_included = set()
+        
+        for m in sorted(plus_one.members, key=lambda x: x.name):
+            if m.id in ids.TO_EXCLUDE_FROM_VOTING:
+                excluded_from_voting += 1
+                continue
+            is_vouch = False
+            for r in m.roles:
+                if r.name == "Vouch":
+                    vouches.append(m)
+                    is_vouch = True
+                    continue
+            if is_vouch:
+                continue
+            to_be_said += self.discord_tag_or_nickname(m)
+            ids_included.add(m.id)
+        to_be_said += "> Vouches\n"
+
+        for m in vouches:
+            to_be_said += self.discord_tag_or_nickname(m)
+            ids_included.add(m.id)
+        to_be_said += "> Suggested eligible for voting\n"
+
+        suggest_ch = self.bot.get_channel(ids.PLUSONE_SUGGEST_CHANNEL_ID)
+        for m in await suggest_ch.history().flatten():
+            for r in m.reactions:
+                if r.emoji == "👍" and r.count >= SUGGEST_LIMIT:
+                    for e in m.embeds:
+                        user_id = int(e.footer.text)
+                        if user_id in ids_included:
+                            break
+                        user_name = e.title.split("User Suggestion: ")[1]
+                        to_be_said += f"{user_name} <{user_id}>\n"
+
+        to_be_said += f"\n{len(plus_one.members)} members in the server ({excluded_from_voting} excluded from voting)"
+        for msg in split_to_shorter_parts(to_be_said):
+            await ctx.send(msg)
 
     @commands.command(name='whoami')
     async def tell_them_how_it_is(self, ctx):
