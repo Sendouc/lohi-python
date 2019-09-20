@@ -11,11 +11,7 @@ class MiscCog(commands.Cog, name="Misc"):
         self.bot = bot
     
     async def is_in_sendou_server(ctx):
-        can_be_sent = ctx.message.guild.id == ids.SENDOU_SERVER_ID
-        if not can_be_sent:
-            await ctx.send('This command can only be used in the "Sendou" server')
-        
-        return can_be_sent
+        return ctx.message.guild.id == ids.SENDOU_SERVER_ID
 
     async def can_create_color_roles(ctx):
         if ctx.message.guild.id == ids.PLUSONE_SERVER_ID:
@@ -25,10 +21,8 @@ class MiscCog(commands.Cog, name="Misc"):
             for role in ctx.message.author.roles:
                 if role.name in ["Twitch Subscriber", "Staff", "Nitro Booster"]:
                     return True
-            await ctx.send("This command can only be used by Twitch subscribers or Nitro Boosters")
             return False
 
-        await ctx.send("This command can't be used in this server")
         return False
 
     @commands.command()

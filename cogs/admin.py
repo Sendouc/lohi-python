@@ -23,6 +23,17 @@ class AdminCog(commands.Cog, name="Admin", command_attrs=dict(hidden=True)):
             await member.remove_roles(role)
         await ctx.send (f'All done with removing {role.name} from the users.')
 
+    @commands.command(name='plusone')
+    async def display_members_for_voting(self, ctx):
+        '''
+        Displays the relevant members in +1 in a format
+        usable for voting.
+        '''
+        to_be_said = "```\n"
+        plus_one = self.bot.get_guild(ids.PLUSONE_SERVER_ID)
+        for m in plus_one.members:
+            to_be_said += m.name
+
     # https://gist.github.com/EvieePy/d78c061a4798ae81be9825468fe146be
 
     @commands.command(name='r')
