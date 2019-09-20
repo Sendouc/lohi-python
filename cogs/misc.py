@@ -100,7 +100,6 @@ class MiscCog(commands.Cog, name="Misc"):
         Displays the relevant members in +1 in a format
         usable for voting.
         '''
-        # TODO: Members not in order
         SUGGEST_LIMIT = 11
         to_be_said = "> Members\n"
         plus_one = self.bot.get_guild(ids.PLUSONE_SERVER_ID)
@@ -108,7 +107,7 @@ class MiscCog(commands.Cog, name="Misc"):
         vouches = []
         ids_included = set()
         
-        for m in sorted(plus_one.members, key=lambda x: x.name):
+        for m in sorted(plus_one.members, key=lambda x: x.name.lower()):
             if m.id in ids.TO_EXCLUDE_FROM_VOTING:
                 excluded_from_voting += 1
                 continue
