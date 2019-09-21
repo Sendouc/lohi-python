@@ -23,6 +23,13 @@ class AdminCog(commands.Cog, name="Admin", command_attrs=dict(hidden=True)):
             await member.remove_roles(role)
         await ctx.send (f'All done with removing {role.name} from the users.')
 
+    @commands.command(name='emo')
+    async def emoji_to_string(self, ctx, emoji: discord.Emoji):
+        '''
+        Displays a bot friendly string of the emoji given.
+        '''
+        await ctx.send(f"`<:{emoji.name}:{emoji.id}>`")
+
     # https://gist.github.com/EvieePy/d78c061a4798ae81be9825468fe146be
 
     @commands.command(name='r')

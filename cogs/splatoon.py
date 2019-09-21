@@ -3,6 +3,7 @@ from discord.ext import commands
 import time
 
 from .utils.lists import map_part_to_full, mode_part_to_full, modes_to_emoji, weapons_to_emoji
+from .utils.embed import weapon_builds
 
 class SplatoonCog(commands.Cog, name="Splatoon"):
     def __init__(self, bot):
@@ -124,6 +125,15 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             to_be_said += f' {rot["stage"]["name"]}\n\n'
 
         await ctx.send(to_be_said)
+
+    @commands.command(name='builds')
+    async def display_builds(self, ctx, *user_or_weapon):
+        '''
+        Searchs for builds with the given
+        user or weapon.
+        '''
+        builds_dict = await self.bot.api.get_builds(weapon="Tenta Brella")
+        await ctx.send(embed=weapon_builds(builds_dict["builds"][:10], "Tenta Brella"))
 
 def setup(bot):
     bot.add_cog(SplatoonCog(bot))
