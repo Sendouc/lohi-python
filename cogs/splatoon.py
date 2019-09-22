@@ -3,7 +3,7 @@ from discord.ext import commands
 import time
 
 from .utils.lists import map_part_to_full, mode_part_to_full, modes_to_emoji, weapons_to_emoji
-from .utils.embed import weapon_builds
+from .utils.classes.LohiEmbed import LohiEmbed
 
 class SplatoonCog(commands.Cog, name="Splatoon"):
     def __init__(self, bot):
@@ -132,8 +132,21 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
         Searchs for builds with the given
         user or weapon.
         '''
-        builds_dict = await self.bot.api.get_builds(weapon="Tenta Brella")
-        await ctx.send(embed=weapon_builds(builds_dict["builds"][:10], "Tenta Brella"))
+        weapon = "Tenta Brella"
+        page = 1
+        user_id = None
+
+        builds_dict = await self.bot.api.get_builds(weapon=weapon, page=page)
+        wpn_emoji = weapons_to_emoji[weapon]
+        builds_embed = LohiEmbed(title=f"{wpn_emoji} {weapon} Builds", url=f"https://sendou.ink/builds/{weapon.replace(' ', '_')}")
+        builds_embed.add_weapon_build_fields(builds_dict["builds"])
+
+        for e in builds_embed.get_embeds():
+            await ctx.send(embed=e)
+
+        page_count = builds_dict["pageCount"]
+        if (page_count > page):
+            await ctx.send(f"> Page {page}/{page_count}\nUse command `.builds {page+1}` to view the next page.")
 
 def setup(bot):
     bot.add_cog(SplatoonCog(bot))

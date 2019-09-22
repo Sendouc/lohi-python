@@ -1,6 +1,7 @@
 # My additions
 
 config.*
+google_sheet_secret.json
 .vscode/
 
 # Byte-compiled / optimized / DLL files

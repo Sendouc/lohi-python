@@ -18,6 +18,9 @@ class MiscCog(commands.Cog, name="Misc"):
         return (ctx.message.guild and ctx.message.guild.id == ids.PLUSONE_SERVER_ID) or ctx.message.author.id == ids.OWNER_ID
 
     async def can_create_color_roles(ctx):
+        if not ctx.message.guild:
+            return False
+            
         if ctx.message.guild.id == ids.PLUSONE_SERVER_ID:
             return True
 
