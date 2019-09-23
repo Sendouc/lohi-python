@@ -29,6 +29,25 @@ class AdminCog(commands.Cog, name="Admin"):
             await member.remove_roles(role)
         await ctx.send (f'All done with removing {role.name} from the users.')
 
+    @commands.command(name='deleteunusedcolor')
+    async def delete_ununused_color_roles(self, ctx):
+        '''
+        Deletes any role that has '!' in the name
+        and nobody has currently
+        '''
+        if not ctx.message.guild:
+            return await ctx.send('You are not in a server.')
+        
+        to_be_said = ""
+        for role in ctx.message.guild.roles:
+            if "!" in role.name and len(role.members) == 0:
+                await role.delete()
+                to_be_said += f"{role.name}\n"
+        
+        if len(to_be_said) == 0:
+            return await ctx.send("No roles to delete.")
+        await ctx.send(f"Deleted:\n{to_be_said}")
+
     @commands.command(name='emo')
     async def emoji_to_string(self, ctx, emoji: discord.Emoji):
         '''
@@ -146,7 +165,7 @@ class AdminCog(commands.Cog, name="Admin"):
         if voting_result_channel is None:
             voting_result_channel = await self.bot.fetch_channel(ids.PLUSONE_VOTING_RESULT_CHANNEL_ID)
         
-        await voting_result_channel.set_permissions(plusone.default_role, read_messages=False)
+        await voting_result_channel.set_permissions(plusone.default_role, read_messages=False, add_reactions=False, send_messages=False)
         for msg in split_to_shorter_parts("".join(to_be_said)):
             await voting_result_channel.send(msg)
         

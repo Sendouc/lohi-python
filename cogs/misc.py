@@ -109,6 +109,8 @@ class MiscCog(commands.Cog, name="Misc"):
         excluded_from_voting = 0
         vouches = []
         ids_included = set()
+        na_players = 0
+        eu_players = 0
         
         for m in sorted(plus_one.members, key=lambda x: x.name.lower()):
             if m.id in ids.TO_EXCLUDE_FROM_VOTING:
@@ -119,7 +121,11 @@ class MiscCog(commands.Cog, name="Misc"):
                 if r.name == "Vouch":
                     vouches.append(m)
                     is_vouch = True
-                    continue
+                
+                if r.name == "EU":
+                    eu_players += 1
+                elif r.name == "NA":
+                    na_players += 1
             if is_vouch:
                 continue
             to_be_said += self.discord_tag_or_nickname(m)
@@ -129,9 +135,13 @@ class MiscCog(commands.Cog, name="Misc"):
         for m in vouches:
             to_be_said += self.discord_tag_or_nickname(m)
             ids_included.add(m.id)
+        if len(vouches) == 0:
+            to_be_said += "None\n"
+
         to_be_said += "> Suggested eligible for voting\n"
 
         suggest_ch = self.bot.get_channel(ids.PLUSONE_SUGGEST_CHANNEL_ID)
+        there_are_suggested = False
         for m in await suggest_ch.history().flatten():
             for r in m.reactions:
                 if r.emoji == "👍" and r.count >= SUGGEST_LIMIT:
@@ -141,8 +151,13 @@ class MiscCog(commands.Cog, name="Misc"):
                             break
                         user_name = e.title.split("User Suggestion: ")[1]
                         to_be_said += f"`{user_name} [*] <@{user_id}>`\n"
+                        there_are_suggested = True
+        
+        if not there_are_suggested:
+            to_be_said += "None\n"
 
-        to_be_said += f"\n{len(plus_one.members)} members in the server ({excluded_from_voting} excluded from voting)"
+        to_be_said += f"\n{len(plus_one.members)} members in the server ({excluded_from_voting} excluded from voting)\n" \
+        f"EU: {eu_players} NA: {na_players}"
         for msg in split_to_shorter_parts(to_be_said):
             await ctx.send(msg)
 
