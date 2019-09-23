@@ -1,7 +1,8 @@
 class VotedPlayer:
 
-    def __init__(self, name: str, suggested: bool = False):
+    def __init__(self, name: str, na: bool, id: int, suggested: bool = False):
         self.name = name
+        self.id = id
         # True if the user was suggested (in other words False means the player was in the server at the time of the
         # voting.
         self.suggested = suggested
@@ -13,6 +14,7 @@ class VotedPlayer:
         self.minusone = [0, 0]
         # How many votes there were
         self.count = [0, 0]
+        self.na = na
 
     def __gt__(self, player2):
         return self.vote_sum() > player2.vote_sum()
@@ -23,6 +25,10 @@ class VotedPlayer:
 
     def add_vote(self, vote: int, na: bool) -> None:
         index = int(na)
+        # If the voter is from the opposite region we half their vote
+        if self.na != na and (vote == 2 or vote == -2):
+            vote /= 2
+
         if vote == 2:
             self.plustwo[index] += 1
         elif vote == 1:
@@ -37,7 +43,7 @@ class VotedPlayer:
         self.count[index] += 1
 
     def get_vote_ratio(self) -> str:
-        vote_ratio = self.vote_sum() / self.votes_total()
+        vote_ratio = float(self.get_regional_vote_ratio(True)) + float(self.get_regional_vote_ratio(False))
         return "%+.2f" % round(vote_ratio, 2)
 
     def get_regional_vote_ratio(self, na: bool) -> str:

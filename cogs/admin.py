@@ -1,6 +1,7 @@
 import discord
 import os
 import gspread
+import asyncio
 from datetime import datetime
 from oauth2client.service_account import ServiceAccountCredentials
 from discord.ext import commands
@@ -75,17 +76,44 @@ class AdminCog(commands.Cog, name="Admin"):
         votes = worksheet.get_all_values()
         players_voted_on = []
 
+        plusone = self.bot.get_guild(ids.PLUSONE_SERVER_ID)
         for title in votes[0]:
             if "Vote" in title:
+                # Finding if the member is NA or not
+                discord_id = int(title.split("<@")[1].split(">")[0])
+                member = plusone.get_member(discord_id)
+                is_na = None
+                if member:
+                    for r in member.roles:
+                        if r.name == "EU":
+                            is_na = False
+                            break
+                        elif r.name == "NA":
+                            is_na = True
+                            break
+                if is_na is None:
+                    await ctx.send(f"Is {title.replace('Vote [', '').replace(']', '')} `NA` or `EU`?")
+                    def confirm_check(m):
+                        return (m.content.upper() == 'NA' or m.content.upper() == 'EU') and m.author == ctx.message.author
+
+                    try:
+                        msg = await self.bot.wait_for('message', timeout=60.0, check=confirm_check)
+                        if (msg.content.upper() == "NA"):
+                            is_na = True
+                        else:
+                            is_na = False
+                    except asyncio.TimeoutError:
+                        return await ctx.send(f"Assigning region timed out.")
+
                 if "[*]" in title:
                     title_parts = title.split("[")
                     name = title_parts[1].strip()
-                    player = VotedPlayer(name, suggested=True)
+                    player = VotedPlayer(name=name, id=discord_id, suggested=True, na=is_na)
                     players_voted_on.append(player)
                 else:
                     title_parts = title.split("[")
-                    name = title_parts[1][:-1]
-                    player = VotedPlayer(name)
+                    name = title_parts[1][:-1].strip()
+                    player = VotedPlayer(name=name, id=discord_id, na=is_na)
                     players_voted_on.append(player)
 
         del votes[0]
@@ -100,24 +128,18 @@ class AdminCog(commands.Cog, name="Admin"):
 
         na_ballots = 0
         eu_ballots = 0
-        plusone = self.bot.get_guild(ids.PLUSONE_SERVER_ID)
         for row in votes:
             voter_id = int(row[1].split("<@")[1].split(">")[0])
             member = plusone.get_member(voter_id)
-            if member is None:
-                member = await plusone.fetch_member(voter_id)
             is_na = None
-            for r in member.roles:
-                if r.name == "EU":
-                    is_na = False
-                    eu_ballots += 1
-                    break
-                elif r.name == "NA":
-                    is_na = True
-                    na_ballots += 1
-                    break
-            if is_na is None:
-                raise ValueError(f"{member.name} doesn't have region role")
+            for p in players_voted_on:
+                if p.id == voter_id:
+                    is_na = p.na
+
+            if is_na:
+                na_ballots += 1
+            else:
+                eu_ballots += 1
 
             # First two columns contain time stamp and name of the voter so we ignore them.
             for count, vote in enumerate(row[2:-1]):
@@ -161,9 +183,12 @@ class AdminCog(commands.Cog, name="Admin"):
         to_be_said.append(f"\n*{eu_ballots+na_ballots} votes (NA: {na_ballots} EU: {eu_ballots})\n"
         f"Average: {'%+.2f' % round(average_score_ratio, 2)}*")
 
-        voting_result_channel = self.bot.get_channel(ids.PLUSONE_VOTING_RESULT_CHANNEL_ID)
+        # voting_result_channel = self.bot.get_channel(ids.PLUSONE_VOTING_RESULT_CHANNEL_ID)
+        # if voting_result_channel is None:
+        #     voting_result_channel = await self.bot.fetch_channel(ids.PLUSONE_VOTING_RESULT_CHANNEL_ID)
+        voting_result_channel = self.bot.get_channel(ids.PLUSONE_VOTING_TEST_CHANNEL)
         if voting_result_channel is None:
-            voting_result_channel = await self.bot.fetch_channel(ids.PLUSONE_VOTING_RESULT_CHANNEL_ID)
+            voting_result_channel = await self.bot.fetch_channel(ids.PLUSONE_VOTING_TEST_CHANNEL)
         
         await voting_result_channel.set_permissions(plusone.default_role, read_messages=False, add_reactions=False, send_messages=False)
         for msg in split_to_shorter_parts("".join(to_be_said)):
