@@ -146,6 +146,8 @@ class MiscCog(commands.Cog, name="Misc"):
         for msg in split_to_shorter_parts(to_be_said):
             await ctx.send(msg)
 
+        # TODO: NA/EU count
+
     @commands.command(name='whoami')
     async def tell_them_how_it_is(self, ctx):
         '''

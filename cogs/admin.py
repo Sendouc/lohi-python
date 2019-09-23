@@ -76,7 +76,8 @@ class AdminCog(commands.Cog, name="Admin"):
         for row in votes:
             name_lower = row[1].lower()
             if name_lower in names:
-                await ctx.send(f"Duplicate name found: {row[1]}")
+                return await ctx.send(f"Duplicate name found: {row[1]}")
+            names.append(name_lower)
 
         na_ballots = 0
         eu_ballots = 0
