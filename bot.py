@@ -25,7 +25,20 @@ async def check_if_channel_white_listed(ctx):
     Commands can only be used on white listed channels or DM's. 
     The owner user can use them anywhere.
     '''
-    return ctx.message.author.id == ids.OWNER_ID or ctx.guild is None or ctx.message.channel.id in ids.WHITELISTED_CHANNELS
+    if ctx.author.id == ids.OWNER_ID:
+        return True
+
+    if ctx.guild is None:
+        return True
+
+    if ctx.channel.id in ids.WHITELISTED_CHANNELS:
+        return True
+
+    for r in ctx.author.roles:
+        if r.name == "Staff":
+            return True
+    
+    return False
 
 @bot.event
 async def on_error(event, *args, **kwargs):
