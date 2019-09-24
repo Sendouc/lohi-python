@@ -1,14 +1,15 @@
 import discord
+from discord.ext import commands
 import os
 import gspread
 import asyncio
 from datetime import datetime
 from oauth2client.service_account import ServiceAccountCredentials
-from discord.ext import commands
 
 from .utils import ids
 from .utils.classes.VotedPlayer import VotedPlayer
 from .utils.helper import split_to_shorter_parts
+from .utils.lists import weapons
 
 class AdminCog(commands.Cog, name="Admin"):
     def __init__(self, bot):
@@ -19,6 +20,10 @@ class AdminCog(commands.Cog, name="Admin"):
         Check that makes sure nobody else but me uses the commands here.
         '''
         return ctx.message.author.id == ids.OWNER_ID
+
+    @commands.command(name='test')
+    async def test_command(self, ctx, *, weapon):
+        await ctx.send(f"{weapon}")
 
     @commands.command(name='removeall')
     async def remove_role_from_members(self, ctx, role: discord.Role):

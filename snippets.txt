@@ -1,0 +1,13 @@
+# Removed commands
+
+@commands.command(name='test')
+    async def test_command(self, ctx):
+        _2017_role = ctx.guild.get_role(626168231605829632)
+        _2018_role = ctx.guild.get_role(626168234315350057)
+        _2019_role = ctx.guild.get_role(626168303827812367)
+        roles = {"2017": _2017_role, "2018": _2018_role, "2019": _2019_role}
+        for member in ctx.guild.members:
+            year_str = str(member.joined_at)[:4]
+            await member.add_roles(roles[year_str])
+            
+        await ctx.send('all done!')

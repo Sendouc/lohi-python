@@ -4,6 +4,7 @@ import time
 
 from .utils.lists import map_part_to_full, mode_part_to_full, modes_to_emoji, weapons_to_emoji
 from .utils.classes.LohiEmbed import LohiEmbed
+from .utils.helper import get_close_weapon
 
 class SplatoonCog(commands.Cog, name="Splatoon"):
     def __init__(self, bot):
@@ -126,15 +127,28 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
 
         await ctx.send(to_be_said)
 
-    @commands.command(name='builds')
-    async def display_builds(self, ctx, *user_or_weapon):
+    @commands.command(name='wbuilds')
+    async def display_builds_of_weapon(self, ctx, *weapon_and_page):
         '''
         Searchs for builds with the given
         user or weapon.
+        Example usage: .wbuilds Tenta Brella
         '''
-        weapon = "Tenta Brella"
         page = 1
-        user_id = None
+
+        weapon_parts = []
+        for arg in weapon_and_page:
+            if "(" in arg and ")" in arg:
+                try:
+                    page = int(arg)
+                    continue
+                except ValueError:
+                    return await ctx.send(f"Expected {arg} to be a number since it was wrapped in ( ) but it wasn't...")
+
+            weapon_parts.append(arg)
+        
+        weapon = get_close_weapon(" ".join(weapon_parts))
+        return await ctx.send(f"{weapon}")
 
         builds_dict = await self.bot.api.get_builds(weapon=weapon, page=page)
         wpn_emoji = weapons_to_emoji[weapon]
@@ -146,7 +160,7 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
 
         page_count = builds_dict["pageCount"]
         if (page_count > page):
-            await ctx.send(f"> Page {page}/{page_count}\nUse command `.builds {page+1}` to view the next page.")
+            await ctx.send(f"> Page {page}/{page_count}\nUse command `.builds ({page+1})` to view the next page.")
 
 def setup(bot):
     bot.add_cog(SplatoonCog(bot))
