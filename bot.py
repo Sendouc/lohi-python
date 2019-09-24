@@ -4,7 +4,7 @@ import traceback
 
 from cogs.utils import config, ids, api
 
-INITIAL_EXTENSIONS = ('cogs.splatoon', 'cogs.misc', 'cogs.admin')
+INITIAL_EXTENSIONS = ('cogs.splatoon', 'cogs.misc', 'cogs.admin', 'cogs.tourney')
 
 bot = commands.Bot(command_prefix='.', case_insensitive=True, max_messages=None)
 
