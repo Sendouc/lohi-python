@@ -6,12 +6,14 @@ from ..lists import weapons_english_internal, abilities_short_to_emoji, top_500_
 
 # Cheers to Lean
 class LohiEmbed():
-    def __init__(self, title = '\uFEFF', description = '\uFEFF', color = 0x60dd8e, url = None):
+    def __init__(self, title = '\uFEFF', description = '\uFEFF', color = 0x60dd8e, url = None, footer = None):
         self.title = title
         self.description = description
         self.color = color
         self.url = url
         self.fields = []
+        self.footer = footer
+        
         
     def add_field(self, name, value, inline=True):
         self.fields.append((name, value, inline))
@@ -43,6 +45,7 @@ class LohiEmbed():
         
         used_up = len(title) + len(desc)
         embed = discord.Embed(title=title, description=desc, color=self.color, url=self.url)
+        embed.set_footer(text=self.footer)
         
         returned_embeds = []
         for i in range(len(self.fields)):
@@ -54,6 +57,7 @@ class LohiEmbed():
                 returned_embeds.append(embed)
                 title = self.title + " (cont.)"
                 embed = discord.Embed(title=title, description=desc, color=self.color, url=self.url)
+                embed.set_footer(text=self.footer)
                 used_up = len(title) + len(desc)
             
             used_up += additional

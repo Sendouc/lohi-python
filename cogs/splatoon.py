@@ -130,8 +130,7 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
     @commands.command(name='wbuilds')
     async def display_builds_of_weapon(self, ctx, *weapon_and_page):
         '''
-        Searchs for builds with the given
-        user or weapon.
+        Searchs for builds with the given weapon.
         Example usage: .wbuilds Tenta Brella
         '''
         page = 1
@@ -140,27 +139,31 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
         for arg in weapon_and_page:
             if "(" in arg and ")" in arg:
                 try:
-                    page = int(arg)
+                    page = int(arg.replace("(", "").replace(")", ""))
                     continue
                 except ValueError:
-                    return await ctx.send(f"Expected {arg} to be a number since it was wrapped in ( ) but it wasn't...")
+                    return await ctx.send(f"Expected `{arg}` to be a number since it was wrapped in ( ) but it wasn't...")
 
             weapon_parts.append(arg)
         
-        weapon = get_close_weapon(" ".join(weapon_parts))
-        return await ctx.send(f"{weapon}")
+        weapon_parts_joined = " ".join(weapon_parts)
+        weapon = get_close_weapon(weapon_parts_joined)
+        if weapon is None:
+            return await ctx.send(f"Sorry I'm not sure what weapon `{weapon_parts_joined}` is referring to...")
 
         builds_dict = await self.bot.api.get_builds(weapon=weapon, page=page)
+        if builds_dict is None:
+            return await ctx.send(f"{weapon} doesn't have {page} pages...")
         wpn_emoji = weapons_to_emoji[weapon]
-        builds_embed = LohiEmbed(title=f"{wpn_emoji} {weapon} Builds", url=f"https://sendou.ink/builds/{weapon.replace(' ', '_')}")
+        page_count = builds_dict["pageCount"]
+        builds_embed = LohiEmbed(title=f"{wpn_emoji} {weapon} Builds", url=f"https://sendou.ink/builds/{weapon.replace(' ', '_')}", footer=f"Page {page}/{page_count}")
         builds_embed.add_weapon_build_fields(builds_dict["builds"])
 
         for e in builds_embed.get_embeds():
             await ctx.send(embed=e)
 
-        page_count = builds_dict["pageCount"]
         if (page_count > page):
-            await ctx.send(f"> Page {page}/{page_count}\nUse command `.builds ({page+1})` to view the next page.")
+            await ctx.send(f"Use the command `.wbuilds {weapon_parts_joined} ({page+1})` to view the next page.")
 
 def setup(bot):
     bot.add_cog(SplatoonCog(bot))

@@ -60,4 +60,6 @@ class ApiConnecter:
         if "discord_id" in kwargs:
             pass
         response_dict = await self.sendou_ink_query(searchForBuildsByWeapon, kwargs)
+        if response_dict is None:
+            return None
         return response_dict["searchForBuildsByWeapon"]
