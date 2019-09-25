@@ -6,7 +6,7 @@ from ..lists import weapons_english_internal, abilities_short_to_emoji, top_500_
 
 # Cheers to Lean
 class LohiEmbed():
-    def __init__(self, title = '\uFEFF', description = '\uFEFF', color = 0x60dd8e, url = None, footer = None):
+    def __init__(self, title = '\uFEFF', description = '\uFEFF', color = 0x60dd8e, url = None, footer = '\uFEFF'):
         self.title = title
         self.description = description
         self.color = color
@@ -14,20 +14,21 @@ class LohiEmbed():
         self.fields = []
         self.footer = footer
         
-        
-    def add_field(self, name, value, inline=True):
+    def add_field(self, name = '\uFEFF', value = '\uFEFF', inline = True):
         self.fields.append((name, value, inline))
     
-    def add_weapon_build_fields(self, builds):
+    def add_weapon_build_fields(self, builds, top500_only = False):
         for build in builds:
+            is_top500 = build["top"]
+            if top500_only and not is_top500:
+                continue
             title = build['title']
             discord_tag = f"{build['discord_user']['username']}#{build['discord_user']['discriminator']}"
             if title:
                 title = f"{title} by {discord_tag}"
             else:
                 title = f"{discord_tag}"
-            top500 = build["top"]
-            if top500:
+            if is_top500:
                 title = f"{top_500_emoji} {title}"
             ability_arrs = [build["headgear"], build["clothing"], build["shoes"]]
             ability_str = ""
@@ -38,6 +39,9 @@ class LohiEmbed():
                         ability_str += "|"
                 ability_str += "\n"
             self.add_field(title, ability_str, False)
+
+        if len(self.fields) == 0:
+            self.add_field(value="No builds found!")
         
     def get_embeds(self):
         title = self.title[:256-8]

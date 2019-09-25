@@ -132,8 +132,12 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
         '''
         Searchs for builds with the given weapon.
         Example usage: .wbuilds Tenta Brella
+        Special arguments:
+        (number) - Shows the page corresponding the number
+        top500 - Shows top500 builds only
         '''
         page = 1
+        top500 = False
 
         weapon_parts = []
         for arg in weapon_and_page:
@@ -143,6 +147,10 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
                     continue
                 except ValueError:
                     return await ctx.send(f"Expected `{arg}` to be a number since it was wrapped in ( ) but it wasn't...")
+
+            if arg.upper() == "TOP500":
+                top500 = True
+                continue
 
             weapon_parts.append(arg)
         
@@ -156,13 +164,19 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             return await ctx.send(f"{weapon} doesn't have {page} pages...")
         wpn_emoji = weapons_to_emoji[weapon]
         page_count = builds_dict["pageCount"]
-        builds_embed = LohiEmbed(title=f"{wpn_emoji} {weapon} Builds", url=f"https://sendou.ink/builds/{weapon.replace(' ', '_')}", footer=f"Page {page}/{page_count}")
-        builds_embed.add_weapon_build_fields(builds_dict["builds"])
+        # TODO: See below.
+        footer = '\uFEFF'
+        if not top500:
+            footer = f"Page {page}/{page_count}"
+        builds_embed = LohiEmbed(title=f"{wpn_emoji} {weapon} Builds", url=f"https://sendou.ink/builds/{weapon.replace(' ', '_')}", footer=footer)
+        builds_embed.add_weapon_build_fields(builds_dict["builds"], top500_only=top500)
 
         for e in builds_embed.get_embeds():
             await ctx.send(embed=e)
 
-        if (page_count > page):
+        # TODO: Basically this is a bit bad since if there are over 20 Top 500 builds the user won't know there is another page
+        # to view but this isn't a problem that can occur just yet.
+        if (page_count > page and not top500):
             await ctx.send(f"Use the command `.wbuilds {weapon_parts_joined} ({page+1})` to view the next page.")
 
 def setup(bot):
