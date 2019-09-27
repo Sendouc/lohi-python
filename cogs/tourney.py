@@ -39,13 +39,19 @@ class TournamentCog(commands.Cog):
         if not member:
             return await ctx.send("Member with that name couldn't be found.")
 
-        if len(team_name) > 30:
-            return await ctx.send(f"Team name is too long. It has be to be 30 or less but it was {len(team_name)} characters long.")
-        
-        role = None
         for r in ctx.message.guild.roles:
             if r.name == TOURNAMENT_PARTICIPANT_ROLE_NAME:
                 role = r
+
+        # Checking if another member of this team already claimed a role
+        for team_captain in role.members:
+            existing_team_name = team_captain.nick.split("[")[1].split("]")[0]
+            if team_name.upper() == existing_team_name.upper():
+                return await ctx.send(f"There already is a captain for {team_name}")
+
+        if len(team_name) > 30:
+            return await ctx.send(f"Team name is too long. It has be to be 30 or less but it was {len(team_name)} characters long.")
+
         await member.add_roles(role)
 
         if new_name is None:
