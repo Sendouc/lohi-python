@@ -82,9 +82,7 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
                 )
         rotation_data = await self.bot.api.get_rotation_data()
         if "Turf War" in ok_modes:
-            return await ctx.send(
-                "Adding Turf tomorrow lol until then scrim Bunker Games hard"
-            )
+            return await ctx.send("Scrim Bunker Games hard!")
         else:
             for mode in ok_modes:
                 to_be_said_parts.append(f"{mode}, ")
@@ -221,9 +219,11 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
         Special arguments:
         [(number)] - Amount of maps to generate
         [name of maplist] - Default is this month's ranked
+        pretty - Different formatting with emoji
         """
         maplists = await self.bot.api.get_maplists()
         amount_to_generate = 20
+        pretty = False
         maplist_names = []
         for maplist in maplists:
             maplist_names.append(maplist["name"])
@@ -244,6 +244,9 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
                     )
             else:
                 found_maplist = False
+                if option.upper() == "PRETTY":
+                    pretty = True
+                    continue
                 for index, name in enumerate(maplist_names):
                     if option.upper() in name.upper().split(" "):
                         maplist_to_use = maplists[index]
@@ -260,12 +263,22 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             map_pool=maplist_to_use, games=[amount_to_generate]
         )
 
-        to_say = f"> Maplist used: {maplist_name}\n```"
+        to_say = f"> Maplist used: {maplist_name}\n"
+        if not pretty:
+            to_say += "```"
         map_number = 1
         for mode, stage in generated_maps[0]:
-            to_say += f"{map_number}) {mode_part_to_full[mode]} on {stage}\n"
+            if pretty:
+                to_say += f"{map_number}) {modes_to_emoji[mode_part_to_full[mode]]} on `{stage}`\n"
+            else:
+                to_say += f"{map_number}) {mode_part_to_full[mode]} on {stage}\n"
             map_number += 1
-        to_say += "```"
+        if not pretty:
+            to_say += "```"
+        if len(to_say) > 2000:
+            return await ctx.send(
+                f"This maplist is too strong... (length was {len(to_say)} when the max is 2000)"
+            )
         await ctx.send(to_say)
 
 
