@@ -1,7 +1,7 @@
 import aiohttp
 import time
 
-from .graphql import searchForBuildsByWeapon
+from .graphql import searchForBuildsByWeapon, maplists
 
 
 class ApiConnecter:
@@ -22,7 +22,7 @@ class ApiConnecter:
                     r.raise_for_status()
                     return await r.json()
 
-    async def sendou_ink_query(self, query: str, variables: dict) -> dict:
+    async def sendou_ink_query(self, query: str, variables: dict = {}) -> dict:
         "Execute given query on sendou.ink/graphql"
         # https://gist.github.com/gbaman/b3137e18c739e0cf98539bf4ec4366ad
         async with aiohttp.ClientSession() as session:
@@ -78,3 +78,7 @@ class ApiConnecter:
         if response_dict is None:
             return None
         return response_dict["searchForBuildsByWeapon"]
+
+    async def get_maplists(self) -> dict:
+        response_dict = await self.sendou_ink_query(maplists)
+        return response_dict["maplists"]

@@ -10,6 +10,7 @@ from .utils.lists import (
 )
 from .utils.classes.LohiEmbed import LohiEmbed
 from .utils.helper import get_close_weapon
+from .utils.map_generator import map_generation
 
 
 class SplatoonCog(commands.Cog, name="Splatoon"):
@@ -157,7 +158,7 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
         Searchs for builds with the given weapon.
         Example usage: .wbuilds Tenta Brella
         Special arguments:
-        (number) - Shows the page corresponding the number
+        [(number)] - Shows the page corresponding the number
         top500 - Shows top500 builds only
         """
         page = 1
@@ -212,6 +213,60 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             await ctx.send(
                 f"Use the command `.wbuilds {weapon_parts_joined} ({page+1})` to view the next page."
             )
+
+    @commands.command(name="maps")
+    async def generate_maplist_for_scrims(self, ctx, *options):
+        """
+        Get a maplist to scrim on using a maplist of your choice.
+        Special arguments:
+        [(number)] - Amount of maps to generate
+        [name of maplist] - Default is this month's ranked
+        """
+        maplists = await self.bot.api.get_maplists()
+        amount_to_generate = 20
+        maplist_names = []
+        for maplist in maplists:
+            maplist_names.append(maplist["name"])
+
+        maplist_to_use = maplists[0]  # Default is ranked
+        for option in options:
+            if "(" in option and ")" in option:
+                try:
+                    amount_to_generate = int(option.replace("(", "").replace(")", ""))
+                    if 1 > amount_to_generate or amount_to_generate > 50:
+                        return await ctx.send(
+                            "Amount of maps to generate has to be between 1 and 50."
+                        )
+                    continue
+                except ValueError:
+                    return await ctx.send(
+                        f"Expected *{option}* to be a number since it was wrapped in ( ) but it wasn't..."
+                    )
+            else:
+                found_maplist = False
+                for index, name in enumerate(maplist_names):
+                    if option.upper() in name.upper().split(" "):
+                        maplist_to_use = maplists[index]
+                        found_maplist = True
+                        break
+                if not found_maplist:
+                    maplist_names = "\n".join(maplist_names)
+                    return await ctx.send(
+                        f"Sorry not sure what maplist *{option}* is referring to. Available maplists:\n{maplist_names}"
+                    )
+
+        maplist_name = maplist_to_use.pop("name")
+        generated_maps = map_generation(
+            map_pool=maplist_to_use, games=[amount_to_generate]
+        )
+
+        to_say = f"> Maplist used: {maplist_name}\n```"
+        map_number = 1
+        for mode, stage in generated_maps[0]:
+            to_say += f"{map_number}) {mode_part_to_full[mode]} on {stage}\n"
+            map_number += 1
+        to_say += "```"
+        await ctx.send(to_say)
 
 
 def setup(bot):
