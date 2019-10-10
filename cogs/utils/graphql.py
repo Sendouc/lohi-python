@@ -35,3 +35,15 @@ query searchForBuilds($discord_id: String!) {
   }
 }
 """
+
+maplists = """
+{
+  maplists {
+    name
+    sz
+    tc
+    rm
+    cb
+  }
+}
+"""

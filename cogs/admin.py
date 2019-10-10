@@ -11,69 +11,74 @@ from .utils.classes.VotedPlayer import VotedPlayer
 from .utils.helper import split_to_shorter_parts
 from .utils.lists import weapons
 
+
 class AdminCog(commands.Cog, name="Admin"):
     def __init__(self, bot):
         self.bot = bot
 
     async def cog_check(self, ctx):
-        ''' 
+        """ 
         Check that makes sure nobody else but me uses the commands here.
-        '''
+        """
         return ctx.message.author.id == ids.OWNER_ID
 
-    @commands.command(name='test')
+    @commands.command(name="test")
     async def test_command(self, ctx, *, weapon):
         await ctx.send(f"{weapon}")
 
-    @commands.command(name='removeall')
+    @commands.command(name="removeall")
     async def remove_role_from_members(self, ctx, role: discord.Role):
-        '''
+        """
         Takes the given role and removes it from all
         members that have it.
-        '''
+        """
         for member in role.members:
             await member.remove_roles(role)
-        await ctx.send (f'All done with removing {role.name} from the users.')
+        await ctx.send(f"All done with removing {role.name} from the users.")
 
-    @commands.command(name='deleteunusedcolor')
+    @commands.command(name="deleteunusedcolor")
     async def delete_ununused_color_roles(self, ctx):
-        '''
+        """
         Deletes any role that has '!' in the name
         and nobody has currently
-        '''
+        """
         if not ctx.message.guild:
-            return await ctx.send('You are not in a server.')
-        
+            return await ctx.send("You are not in a server.")
+
         to_be_said = ""
         for role in ctx.message.guild.roles:
             if "!" in role.name and len(role.members) == 0:
                 await role.delete()
                 to_be_said += f"{role.name}\n"
-        
+
         if len(to_be_said) == 0:
             return await ctx.send("No roles to delete.")
         await ctx.send(f"Deleted:\n{to_be_said}")
 
-    @commands.command(name='emo')
+    @commands.command(name="emo")
     async def emoji_to_string(self, ctx, emoji: discord.Emoji):
-        '''
+        """
         Displays a bot friendly string of the emoji given.
-        '''
+        """
         await ctx.send(f"`<:{emoji.name}:{emoji.id}>`")
 
-    @commands.command(name='voting')
+    @commands.command(name="voting")
     async def display_voting_results(self, ctx):
-        '''
+        """
         Fetches voting results from Google Sheets
         and parses them into an info post to a 
         designated channel.
-        '''
-        scope = ['https://spreadsheets.google.com/feeds',
-                'https://www.googleapis.com/auth/drive']
+        """
+        scope = [
+            "https://spreadsheets.google.com/feeds",
+            "https://www.googleapis.com/auth/drive",
+        ]
         script_dir = os.path.dirname(__file__)
         rel_path = "google_sheet_secret.json"
         abs_file_path = os.path.join(script_dir, rel_path)
-        sheets = gspread.authorize(ServiceAccountCredentials.from_json_keyfile_name(abs_file_path, scope))
+        sheets = gspread.authorize(
+            ServiceAccountCredentials.from_json_keyfile_name(abs_file_path, scope)
+        )
         sheet = sheets.open("+1 server")
         worksheet = sheet.get_worksheet(0)
 
@@ -97,13 +102,20 @@ class AdminCog(commands.Cog, name="Admin"):
                             is_na = True
                             break
                 if is_na is None:
-                    await ctx.send(f"Is {title.replace('Vote [', '').replace(']', '')} `NA` or `EU`?")
+                    await ctx.send(
+                        f"Is {title.replace('Vote [', '').replace(']', '')} `NA` or `EU`?"
+                    )
+
                     def confirm_check(m):
-                        return (m.content.upper() == 'NA' or m.content.upper() == 'EU') and m.author == ctx.message.author
+                        return (
+                            m.content.upper() == "NA" or m.content.upper() == "EU"
+                        ) and m.author == ctx.message.author
 
                     try:
-                        msg = await self.bot.wait_for('message', timeout=60.0, check=confirm_check)
-                        if (msg.content.upper() == "NA"):
+                        msg = await self.bot.wait_for(
+                            "message", timeout=60.0, check=confirm_check
+                        )
+                        if msg.content.upper() == "NA":
                             is_na = True
                         else:
                             is_na = False
@@ -113,7 +125,9 @@ class AdminCog(commands.Cog, name="Admin"):
                 if "[*]" in title:
                     title_parts = title.split("[")
                     name = title_parts[1].strip()
-                    player = VotedPlayer(name=name, id=discord_id, suggested=True, na=is_na)
+                    player = VotedPlayer(
+                        name=name, id=discord_id, suggested=True, na=is_na
+                    )
                     players_voted_on.append(player)
                 else:
                     title_parts = title.split("[")
@@ -163,10 +177,12 @@ class AdminCog(commands.Cog, name="Admin"):
         now = datetime.now()
         month_year_str = now.strftime("%B %Y")
         to_be_said = [f"__**{month_year_str.upper()}**__\n"]
-        to_be_said_existing_players = ["*Vote ratio is between -2 and 2. "
-        "It is your votes summed up divided by the amount of ballots. "
-        "Followed is the exact amount of different kind of votes you got in order "
-        "(-2/-1/+1/+2)*\n\n-- **Players in +1** --\n\n"]
+        to_be_said_existing_players = [
+            "*Vote ratio is between -2 and 2. "
+            "It is your votes summed up divided by the amount of ballots. "
+            "Followed is the exact amount of different kind of votes you got in order "
+            "(-2/-1/+1/+2)*\n\n-- **Players in +1** --\n\n"
+        ]
         to_be_said_suggested_players = ["\n-- **Players suggested to +1** --\n\n"]
 
         total_ratios = 0.0
@@ -184,48 +200,61 @@ class AdminCog(commands.Cog, name="Admin"):
         to_be_said.extend(to_be_said_existing_players)
         to_be_said.extend(to_be_said_suggested_players)
 
-        average_score_ratio = total_ratios/(na_ballots+eu_ballots)
-        to_be_said.append(f"\n*{eu_ballots+na_ballots} votes (NA: {na_ballots} EU: {eu_ballots})\n"
-        f"Average: {'%+.2f' % round(average_score_ratio, 2)}*")
+        average_score_ratio = total_ratios / (na_ballots + eu_ballots)
+        to_be_said.append(
+            f"\n*{eu_ballots+na_ballots} votes (NA: {na_ballots} EU: {eu_ballots})\n"
+            f"Average: {'%+.2f' % round(average_score_ratio, 2)}*"
+        )
 
         # voting_result_channel = self.bot.get_channel(ids.PLUSONE_VOTING_RESULT_CHANNEL_ID)
         # if voting_result_channel is None:
         #     voting_result_channel = await self.bot.fetch_channel(ids.PLUSONE_VOTING_RESULT_CHANNEL_ID)
         voting_result_channel = self.bot.get_channel(ids.PLUSONE_VOTING_TEST_CHANNEL)
         if voting_result_channel is None:
-            voting_result_channel = await self.bot.fetch_channel(ids.PLUSONE_VOTING_TEST_CHANNEL)
-        
-        await voting_result_channel.set_permissions(plusone.default_role, read_messages=False, add_reactions=False, send_messages=False)
+            voting_result_channel = await self.bot.fetch_channel(
+                ids.PLUSONE_VOTING_TEST_CHANNEL
+            )
+
+        await voting_result_channel.set_permissions(
+            plusone.default_role,
+            read_messages=False,
+            add_reactions=False,
+            send_messages=False,
+        )
         for msg in split_to_shorter_parts("".join(to_be_said)):
             await voting_result_channel.send(msg)
-        
+
     # https://gist.github.com/EvieePy/d78c061a4798ae81be9825468fe146be
 
-    @commands.command(name='r')
+    @commands.command(name="r")
     async def reload_cog(self, ctx, *, cog):
-        '''
+        """
         Command which Reloads a Module.
         Remember to use dot path. e.g: cogs.owner
-        '''
+        """
         try:
             self.bot.unload_extension(cog)
             self.bot.load_extension(cog)
         except Exception as e:
-            await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
+            await ctx.send(f"**`ERROR:`** {type(e).__name__} - {e}")
         else:
-            await ctx.send('Reloading the cog was succesful.')
+            await ctx.send("Reloading the cog was succesful.")
 
-    @commands.command(name='update')
+    @commands.command(name="update")
     async def update(self, ctx):
-        '''
+        """
         Use git pull to update the bot. Courtesy of Lean.
-        '''
-        import subprocess 
-        with subprocess.Popen(["git",  "pull"], stdout=subprocess.PIPE, encoding="utf-8") as proc:
+        """
+        import subprocess
+
+        with subprocess.Popen(
+            ["git", "pull"], stdout=subprocess.PIPE, encoding="utf-8"
+        ) as proc:
             stdout_read = proc.stdout.read()
             await ctx.send(f"```sh\n{stdout_read}```")
         if "Already up to date." not in stdout_read:
             await self.bot.close()
+
 
 def setup(bot):
     bot.add_cog(AdminCog(bot))

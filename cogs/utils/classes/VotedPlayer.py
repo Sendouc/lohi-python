@@ -1,5 +1,4 @@
 class VotedPlayer:
-
     def __init__(self, name: str, na: bool, id: int, suggested: bool = False):
         self.name = name
         self.id = id
@@ -18,10 +17,12 @@ class VotedPlayer:
 
     def __gt__(self, player2):
         return self.vote_sum() > player2.vote_sum()
-    
+
     def __str__(self):
-        return (f"**{self.name}**\n`{sum(self.minustwo)}/{sum(self.minusone)}/{sum(self.plusone)}/{sum(self.plustwo)}`\n"
-        f"__{self.get_vote_ratio()}__ (NA: {self.get_regional_vote_ratio(True)} EU: {self.get_regional_vote_ratio(False)})")
+        return (
+            f"**{self.name}**\n`{sum(self.minustwo)}/{sum(self.minusone)}/{sum(self.plusone)}/{sum(self.plustwo)}`\n"
+            f"__{self.get_vote_ratio()}__ (NA: {self.get_regional_vote_ratio(True)} EU: {self.get_regional_vote_ratio(False)})"
+        )
 
     def add_vote(self, vote: int, na: bool) -> None:
         index = int(na)
@@ -43,7 +44,9 @@ class VotedPlayer:
         self.count[index] += 1
 
     def get_vote_ratio(self) -> str:
-        vote_ratio = float(self.get_regional_vote_ratio(True)) + float(self.get_regional_vote_ratio(False))
+        vote_ratio = float(self.get_regional_vote_ratio(True)) + float(
+            self.get_regional_vote_ratio(False)
+        )
         return "%+.2f" % round(vote_ratio, 2)
 
     def get_regional_vote_ratio(self, na: bool) -> str:
@@ -51,17 +54,21 @@ class VotedPlayer:
         return "%+.2f" % round(vote_ratio, 2)
 
     def vote_sum(self):
-        return ((sum(self.plustwo) * 2) + 
-        (sum(self.plusone) * 1) + 
-        (sum(self.minustwo) * -2) + 
-        (sum(self.minusone) * -1))
+        return (
+            (sum(self.plustwo) * 2)
+            + (sum(self.plusone) * 1)
+            + (sum(self.minustwo) * -2)
+            + (sum(self.minusone) * -1)
+        )
 
     def regional_sum(self, na: bool):
         index = int(na)
-        return ((self.plustwo[index] * 2) + 
-        (self.plusone[index] * 1) + 
-        (self.minustwo[index] * -2) + 
-        (self.minusone[index] * -1))
+        return (
+            (self.plustwo[index] * 2)
+            + (self.plusone[index] * 1)
+            + (self.minustwo[index] * -2)
+            + (self.minusone[index] * -1)
+        )
 
     def votes_total(self):
         return sum(self.count)
