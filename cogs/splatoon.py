@@ -284,7 +284,7 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
         await ctx.send(to_say)
 
     @commands.command(name="pool")
-    async def display_map_pool(self, ctx, map_pool_name=None):
+    async def display_map_pool(self, ctx, *arguments):
         """
         Shows the map belonging to the map pool.
         Calling without arguments shows all the available
@@ -295,23 +295,22 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
         NO_EMOJI = " " * 6
         maplists = await self.bot.api.get_maplists()
         maplist_names = []
+        compact = False
         for maplist in maplists:
             maplist_names.append(maplist["name"])
 
-        if map_pool_name is None:
-            maplist_names = "\n".join(maplist_names)
-            return await ctx.send(f"Available map pools:\n{maplist_names}")
-
         maplist_to_use = None
-        for index, name in enumerate(maplist_names):
-            if map_pool_name.upper() in name.upper().split(" "):
-                maplist_to_use = maplists[index]
-                break
+        for arg in arguments:
+            if arg.upper() == "COMPACT":
+                compact = True
+                continue
+            for index, name in enumerate(maplist_names):
+                if arg.upper() in name.upper().split(" "):
+                    maplist_to_use = maplists[index]
+                    break
         if not maplist_to_use:
             maplist_names = "\n".join(maplist_names)
-            return await ctx.send(
-                f"Sorry not sure what map pool *{map_pool_name}* is referring to. Available map pools:\n{maplist_names}"
-            )
+            return await ctx.send(f"Available map pools:\n{maplist_names}")
 
         to_say = f"> Map pool: {maplist_to_use['name']}\n"
         for m in maps:
@@ -319,7 +318,8 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             for index, mode in enumerate(("sz", "tc", "rm", "cb")):
                 if m in maplist_to_use[mode]:
                     emojis[index] = modes_to_emoji[mode_part_to_full[mode]]
-            to_say += f"{emojis[0]}|{emojis[1]}|{emojis[2]}|{emojis[3]} - `{m}`\n"
+            if emojis != [NO_EMOJI] * 4 or not compact:
+                to_say += f"{emojis[0]}|{emojis[1]}|{emojis[2]}|{emojis[3]} - `{m}`\n"
         for msg in split_to_shorter_parts(to_say):
             await ctx.send(msg)
 
