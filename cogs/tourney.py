@@ -1,11 +1,15 @@
 import discord
 from discord.ext import commands
+import asyncio
+import challonge
 
 from .utils import ids
+from .utils import config
 
 class TournamentCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.challonge_user = None
 
     async def cog_check(self, ctx):
         ''' 
@@ -25,6 +29,10 @@ class TournamentCog(commands.Cog):
                 return True
         
         return False
+
+    async def cog_before_invoke(self, ctx):
+        if self.challonge_user is None:
+            self.challonge_user = await challonge.get_user(config.CHALLONGE_USER_NAME, config.CHALLONGE_API_KEY)
 
     @commands.command(name='part')
     async def change_name_and_give_participant_role(self, ctx, member: discord.Member, team_name: str, new_name: str = None):
@@ -61,6 +69,16 @@ class TournamentCog(commands.Cog):
 
         await member.edit(nick=new_nick)
         await ctx.send(f"Done! New nickname: {new_nick}")
+
+    @commands.command(name='track')
+    async def post_participant_change_of_tournament(self, ctx):
+        '''
+        Tracks the tournament given and posts participants joining
+        or leaving to channel.
+        '''
+        tourneys = await self.challonge_user.get_tournaments("sendous")
+        for participant in await tourneys[0].get_participants():
+            print(participant.challonge_username)
 
 def setup(bot):
     bot.add_cog(TournamentCog(bot))
