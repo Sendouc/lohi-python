@@ -3,13 +3,14 @@ from discord.ext import commands
 import time
 
 from .utils.lists import (
+    maps,
     map_part_to_full,
     mode_part_to_full,
     modes_to_emoji,
     weapons_to_emoji,
 )
 from .utils.classes.LohiEmbed import LohiEmbed
-from .utils.helper import get_close_weapon
+from .utils.helper import get_close_weapon, split_to_shorter_parts
 from .utils.map_generator import map_generation
 
 
@@ -150,6 +151,7 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
 
         await ctx.send(to_be_said)
 
+    # TODO: Make 10 builds per page - needs change on the API
     @commands.command(name="wbuilds")
     async def display_builds_of_weapon(self, ctx, *weapon_and_page):
         """
@@ -255,7 +257,7 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
                 if not found_maplist:
                     maplist_names = "\n".join(maplist_names)
                     return await ctx.send(
-                        f"Sorry not sure what maplist *{option}* is referring to. Available maplists:\n{maplist_names}"
+                        f"Sorry not sure what map pool *{option}* is referring to. Available map pools:\n{maplist_names}"
                     )
 
         maplist_name = maplist_to_use.pop("name")
@@ -263,7 +265,7 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             map_pool=maplist_to_use, games=[amount_to_generate]
         )
 
-        to_say = f"> Maplist used: {maplist_name}\n"
+        to_say = f"> Map pool used: {maplist_name}\n"
         if not pretty:
             to_say += "```"
         map_number = 1
@@ -280,6 +282,46 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
                 f"This maplist is too strong... (length was {len(to_say)} when the max is 2000)"
             )
         await ctx.send(to_say)
+
+    @commands.command(name="pool")
+    async def display_map_pool(self, ctx, map_pool_name=None):
+        """
+        Shows the map belonging to the map pool.
+        Calling without arguments shows all the available
+        map pools.
+        Special arguments:
+        compact - Doesn't show maps not part of the pool.
+        """
+        NO_EMOJI = " " * 6
+        maplists = await self.bot.api.get_maplists()
+        maplist_names = []
+        for maplist in maplists:
+            maplist_names.append(maplist["name"])
+
+        if map_pool_name is None:
+            maplist_names = "\n".join(maplist_names)
+            return await ctx.send(f"Available map pools:\n{maplist_names}")
+
+        maplist_to_use = None
+        for index, name in enumerate(maplist_names):
+            if map_pool_name.upper() in name.upper().split(" "):
+                maplist_to_use = maplists[index]
+                break
+        if not maplist_to_use:
+            maplist_names = "\n".join(maplist_names)
+            return await ctx.send(
+                f"Sorry not sure what map pool *{map_pool_name}* is referring to. Available map pools:\n{maplist_names}"
+            )
+
+        to_say = f"> Map pool: {maplist_to_use['name']}\n"
+        for m in maps:
+            emojis = [NO_EMOJI] * 4
+            for index, mode in enumerate(("sz", "tc", "rm", "cb")):
+                if m in maplist_to_use[mode]:
+                    emojis[index] = modes_to_emoji[mode_part_to_full[mode]]
+            to_say += f"{emojis[0]}|{emojis[1]}|{emojis[2]}|{emojis[3]} - `{m}`\n"
+        for msg in split_to_shorter_parts(to_say):
+            await ctx.send(msg)
 
 
 def setup(bot):
