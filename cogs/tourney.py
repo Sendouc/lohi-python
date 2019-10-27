@@ -6,7 +6,7 @@ from math import log, ceil
 from .utils import ids
 from .utils import config
 from .utils.map_generator import map_generation
-from .utils.lists import maps
+from .utils.lists import maps, modes_to_emoji
 from .utils.helper import split_to_shorter_parts
 
 
@@ -86,9 +86,9 @@ class TournamentCog(commands.Cog):
             return await ctx.send(f"{ruleset} is not a valid ruleset.")
 
         L2 = log(amount_of_teams, 2)
-        # Winners includes grand finals
+        # Winners includes grand finals + bracket reset
         winner_map_amount = ceil(L2) + 1
-        loser_map_amount = ceil(L2) + ceil(log(L2, 2)) - 1
+        loser_map_amount = ceil(L2) + ceil(log(L2, 2))
 
         games = []
         games_enum = []
@@ -155,8 +155,11 @@ class TournamentCog(commands.Cog):
                 winners_round += 1
                 winner_map_count -= 1
 
+        mode_emoji = f"{modes_to_emoji['Splat Zones']} "
         before_all = (
-            "Mode: Splat Zones\n\n" if ruleset.upper() in ["ITZ", "DRAFT"] else ""
+            f"Mode: {mode_emoji}Splat Zones\n\n"
+            if ruleset.upper() in ["ITZ", "DRAFT"]
+            else ""
         )
         for line in split_to_shorter_parts(
             before_all + winner_map_str + losers_map_str
