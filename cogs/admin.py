@@ -213,10 +213,12 @@ class AdminCog(commands.Cog, name="Admin"):
         # voting_result_channel = self.bot.get_channel(ids.PLUSONE_VOTING_RESULT_CHANNEL_ID)
         # if voting_result_channel is None:
         #     voting_result_channel = await self.bot.fetch_channel(ids.PLUSONE_VOTING_RESULT_CHANNEL_ID)
-        voting_result_channel = self.bot.get_channel(ids.PLUSONE_VOTING_TEST_CHANNEL)
+        voting_result_channel = self.bot.get_channel(
+            ids.PLUSONE_VOTING_RESULT_CHANNEL_ID
+        )
         if voting_result_channel is None:
             voting_result_channel = await self.bot.fetch_channel(
-                ids.PLUSONE_VOTING_TEST_CHANNEL
+                ids.PLUSONE_VOTING_RESULT_CHANNEL_ID
             )
 
         await voting_result_channel.set_permissions(
