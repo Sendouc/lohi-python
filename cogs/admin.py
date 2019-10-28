@@ -160,8 +160,12 @@ class AdminCog(commands.Cog, name="Admin"):
             else:
                 eu_ballots += 1
 
-            # First two columns contain time stamp and name of the voter so we ignore them.
-            for count, vote in enumerate(row[2:-1]):
+            # First two rows contain timestamp and voter id
+            # needed so the count finds the right player
+            for count, vote in enumerate(row[2:]):
+                # Last rows contain question(s)
+                if vote not in ["+2", "+1", "-1", "-2"]:
+                    continue
                 player = players_voted_on[count]
                 if vote == "+2":
                     player.add_vote(2, is_na)
