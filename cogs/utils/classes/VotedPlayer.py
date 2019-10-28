@@ -24,7 +24,7 @@ class VotedPlayer:
     def __str__(self):
         return (
             f"**{self.name}**\n`{sum(self.minustwo)}/{sum(self.minusone)}/{sum(self.plusone)}/{sum(self.plustwo)}`\n"
-            f"__{self.get_vote_ratio()}__ (NA: {self.get_regional_vote_ratio(True)} EU: {self.get_regional_vote_ratio(False)})"
+            f"__{self.get_vote_ratio()}__ (NA: {self.get_regional_vote_ratio(True)} EU: {self.get_regional_vote_ratio(False)})\n───"
         )
 
     def add_vote(self, vote: int, na: bool) -> None:
