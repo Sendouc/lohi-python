@@ -16,7 +16,10 @@ class VotedPlayer:
         self.na = na
 
     def __gt__(self, player2):
-        return self.vote_sum() > player2.vote_sum()
+        return (
+            self.get_vote_ratio_for_comparision()
+            > player2.get_vote_ratio_for_comparision()
+        )
 
     def __str__(self):
         return (
@@ -48,6 +51,11 @@ class VotedPlayer:
             self.get_regional_vote_ratio(False)
         )
         return "%+.2f" % round(vote_ratio, 2)
+
+    def get_vote_ratio_for_comparision(self) -> float:
+        return float(self.get_regional_vote_ratio(True)) + float(
+            self.get_regional_vote_ratio(False)
+        )
 
     def get_regional_vote_ratio(self, na: bool) -> str:
         vote_ratio = self.regional_sum(na) / self.regional_total(na)

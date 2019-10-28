@@ -103,7 +103,7 @@ class AdminCog(commands.Cog, name="Admin"):
                             break
                 if is_na is None:
                     await ctx.send(
-                        f"Is {title.replace('Vote [', '').replace(']', '')} `NA` or `EU`?"
+                        f"Is {title.replace('Vote [', '').replace(']', '').replace('[*', '')} `NA` or `EU`?"
                     )
 
                     def confirm_check(m):
