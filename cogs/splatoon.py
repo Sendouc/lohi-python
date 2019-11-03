@@ -128,10 +128,16 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
                 )
             else:
                 time_in_seconds = start_time - current_time
-                time_string = time.strftime(
-                    "**In %-d days %-H hours %-M minutes** \n",
+                if time_in_seconds < 86400:
+                    time_string = time.strftime(
+                    "**In %-H hours %-M minutes** \n",
                     time.gmtime(time_in_seconds),
-                )
+                    )
+                else:
+                    time_string = time.strftime(
+                        "**In %-d days %-H hours %-M minutes** \n",
+                        time.gmtime(time_in_seconds),
+                    )
             if "1 days" in time_string:
                 time_string = time_string.replace("days", "day")
             if " 1 hours" in time_string:
