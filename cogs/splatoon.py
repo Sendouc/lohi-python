@@ -121,17 +121,21 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
                 continue
             if start_time < current_time:
                 time_in_seconds = end_time - current_time
-                # For it to work on Windows - needs to be replaced by #
-                time_string = time.strftime(
-                    "** %-d days %-H hours %-M minutes left** \n",
-                    time.gmtime(time_in_seconds),
-                )
+                if time_in_seconds < 86400:
+                    # For it to work on Windows - needs to be replaced by #
+                    time_string = time.strftime(
+                        "**In %-H hours %-M minutes** \n", time.gmtime(time_in_seconds)
+                    )
+                else:
+                    time_string = time.strftime(
+                        "** %-d days %-H hours %-M minutes left** \n",
+                        time.gmtime(time_in_seconds),
+                    )
             else:
                 time_in_seconds = start_time - current_time
                 if time_in_seconds < 86400:
                     time_string = time.strftime(
-                    "**In %-H hours %-M minutes** \n",
-                    time.gmtime(time_in_seconds),
+                        "**In %-H hours %-M minutes** \n", time.gmtime(time_in_seconds)
                     )
                 else:
                     time_string = time.strftime(
