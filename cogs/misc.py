@@ -29,6 +29,9 @@ class MiscCog(commands.Cog, name="Misc"):
         if ctx.message.guild.id == ids.PLUSONE_SERVER_ID:
             return True
 
+        if ctx.message.guild.id == ids.PLUSTWO_SERVER_ID:
+            return True
+
         if ctx.message.guild.id == ids.SENDOU_SERVER_ID:
             for role in ctx.message.author.roles:
                 if role.name in ["Twitch Subscriber", "Staff", "Nitro Booster"]:
