@@ -118,25 +118,30 @@ class MiscCog(commands.Cog, name="Misc"):
 
     @commands.command(name="plusone")
     @commands.check(is_in_plusone)
-    async def display_members_for_voting(self, ctx):
+    async def display_members_for_voting(self, ctx, plus_two: str = ""):
         """
         Displays the relevant members in +1 in a format
         usable for voting.
         """
         SUGGEST_LIMIT = 11
-        to_be_said = "> Members\n"
-        plus_one = self.bot.get_guild(ids.PLUSONE_SERVER_ID)
+        plus_two = True if plus_two == "+2" else False
+
+        server_id = ids.PLUSTWO_SERVER_ID if plus_two else ids.PLUSONE_SERVER_ID
+        plus_server = self.bot.get_guild(server_id)
         excluded_from_voting = 0
         vouches = []
+        plus_one_members_in_plus_two = []
         ids_included = set()
         na_players = 0
         eu_players = 0
+        to_be_said = "> Members\n"
 
-        for m in sorted(plus_one.members, key=lambda x: x.name.lower()):
+        for m in sorted(plus_server.members, key=lambda x: x.name.lower()):
             if m.id in ids.TO_EXCLUDE_FROM_VOTING:
                 excluded_from_voting += 1
                 continue
             is_vouch = False
+            has_region_role = False
             for r in m.roles:
                 if r.name == "Vouch":
                     vouches.append(m)
@@ -144,8 +149,15 @@ class MiscCog(commands.Cog, name="Misc"):
 
                 if r.name == "EU":
                     eu_players += 1
+                    has_region_role = True
                 elif r.name == "NA":
                     na_players += 1
+                    has_region_role = True
+
+            if not has_region_role:
+                plus_one_members_in_plus_two.append(m)
+                excluded_from_voting += 1
+                continue
             if is_vouch:
                 continue
             to_be_said += self.discord_tag_or_nickname(m)
@@ -158,9 +170,21 @@ class MiscCog(commands.Cog, name="Misc"):
         if len(vouches) == 0:
             to_be_said += "None\n"
 
+        if len(plus_one_members_in_plus_two) > 0:
+            to_be_said += "> Plus One Members\n"
+
+            for m in plus_one_members_in_plus_two:
+                to_be_said += self.discord_tag_or_nickname(m)
+                ids_included.add(m.id)
+
         to_be_said += "> Suggested eligible for voting\n"
 
-        suggest_ch = self.bot.get_channel(ids.PLUSONE_SUGGEST_CHANNEL_ID)
+        suggest_ch_id = (
+            ids.PLUSTWO_SUGGEST_CHANNEL_ID
+            if plus_two
+            else ids.PLUSONE_SUGGEST_CHANNEL_ID
+        )
+        suggest_ch = self.bot.get_channel(suggest_ch_id)
         there_are_suggested = False
         for m in await suggest_ch.history().flatten():
             for r in m.reactions:
@@ -177,13 +201,11 @@ class MiscCog(commands.Cog, name="Misc"):
             to_be_said += "None\n"
 
         to_be_said += (
-            f"\n{len(plus_one.members)} members in the server ({excluded_from_voting} excluded from voting)\n"
+            f"\n{len(plus_server.members)} members in the server ({excluded_from_voting} excluded from voting)\n"
             f"EU: {eu_players} NA: {na_players}"
         )
         for msg in split_to_shorter_parts(to_be_said):
             await ctx.send(msg)
-
-        # TODO: NA/EU count
 
     @commands.command(name="whoami")
     async def tell_them_how_it_is(self, ctx):
