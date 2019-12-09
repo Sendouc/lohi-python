@@ -1,5 +1,5 @@
 class VotedPlayer:
-    def __init__(self, name: str, na: bool, id: int, suggested: bool = False):
+    def __init__(self, name: str, id: int, na: bool = None, suggested: bool = False):
         self.name = name
         self.id = id
         # True if the user was suggested (in other words False means the player was in the server at the time of the
@@ -16,22 +16,35 @@ class VotedPlayer:
         self.na = na
 
     def __gt__(self, player2):
+        if self.na is None:
+            return (
+                self.get_regionless_vote_ratio_for_comparision()
+                > player2.get_regionless_vote_ratio_for_comparision()
+            )
         return (
             self.get_vote_ratio_for_comparision()
             > player2.get_vote_ratio_for_comparision()
         )
 
     def __str__(self):
+        if self.na is None:
+            return (
+                f"**{self.name}**\n`{sum(self.minustwo)}/{sum(self.minusone)}/{sum(self.plusone)}/{sum(self.plustwo)}`\n"
+                f"__{self.get_vote_ratio()}__"
+            )
         return (
             f"**{self.name}**\n`{sum(self.minustwo)}/{sum(self.minusone)}/{sum(self.plusone)}/{sum(self.plustwo)}`\n"
             f"__{self.get_vote_ratio()}__ (NA: {self.get_regional_vote_ratio(True)} EU: {self.get_regional_vote_ratio(False)})\n───"
         )
 
     def add_vote(self, vote: int, na: bool) -> None:
-        index = int(na)
-        # If the voter is from the opposite region we half their vote
-        if self.na != na and (vote == 2 or vote == -2):
-            vote /= 2
+        if self.na is None:
+            index = 1
+        else:
+            index = int(na)
+            # If the voter is from the opposite region we half their vote
+            if self.na != na and (vote == 2 or vote == -2):
+                vote /= 2
 
         if vote == 2:
             self.plustwo[index] += 1
@@ -47,15 +60,25 @@ class VotedPlayer:
         self.count[index] += 1
 
     def get_vote_ratio(self) -> str:
-        vote_ratio = float(self.get_regional_vote_ratio(True)) + float(
-            self.get_regional_vote_ratio(False)
-        )
+        if self.na is None:
+            vote_ratio = float(self.get_regional_vote_ratio(True))
+        else:
+            vote_ratio = float(self.get_regional_vote_ratio(True)) + float(
+                self.get_regional_vote_ratio(False)
+            )
+        return "%+.2f" % round(vote_ratio, 2)
+
+    def get_regionless_vote_ratio(self) -> str:
+        vote_ratio = float(self.get_regional_vote_ratio(True))
         return "%+.2f" % round(vote_ratio, 2)
 
     def get_vote_ratio_for_comparision(self) -> float:
         return float(self.get_regional_vote_ratio(True)) + float(
             self.get_regional_vote_ratio(False)
         )
+
+    def get_regionless_vote_ratio_for_comparision(self) -> float:
+        return float(self.get_regional_vote_ratio(True))
 
     def get_regional_vote_ratio(self, na: bool) -> str:
         vote_ratio = self.regional_sum(na) / self.regional_total(na)

@@ -63,12 +63,13 @@ class AdminCog(commands.Cog, name="Admin"):
         await ctx.send(f"`<:{emoji.name}:{emoji.id}>`")
 
     @commands.command(name="voting")
-    async def display_voting_results(self, ctx):
+    async def display_voting_results(self, ctx, plus_two: str = ""):
         """
         Fetches voting results from Google Sheets
         and parses them into an info post to a 
         designated channel.
         """
+        plus_two = True if plus_two == "+2" else False
         scope = [
             "https://spreadsheets.google.com/feeds",
             "https://www.googleapis.com/auth/drive",
@@ -79,14 +80,16 @@ class AdminCog(commands.Cog, name="Admin"):
         sheets = gspread.authorize(
             ServiceAccountCredentials.from_json_keyfile_name(abs_file_path, scope)
         )
-        sheet = sheets.open("+1 server")
+        sheet_url = "+2 server" if plus_two else "+1 server"
+        sheet = sheets.open(sheet_url)
         worksheet = sheet.get_worksheet(0)
 
         # Get all votes as list of lists
         votes = worksheet.get_all_values()
         players_voted_on = []
 
-        plusone = self.bot.get_guild(ids.PLUSONE_SERVER_ID)
+        server_id = ids.PLUSTWO_SERVER_ID if plus_two else ids.PLUSONE_SERVER_ID
+        plusone = self.bot.get_guild(server_id)
         for title in votes[0]:
             if "Vote" in title:
                 # Finding if the member is NA or not
@@ -101,7 +104,8 @@ class AdminCog(commands.Cog, name="Admin"):
                         elif r.name == "NA":
                             is_na = True
                             break
-                if is_na is None:
+                # It is asked if the voted is EU or NA only if we're not in +2 server OR the person in question wasn't a suggested one
+                if is_na is None and (not plus_two or not "*" in title):
                     await ctx.send(
                         f"Is {title.replace('Vote [', '').replace(']', '').replace('[*', '')} `NA` or `EU`?"
                     )
@@ -113,7 +117,7 @@ class AdminCog(commands.Cog, name="Admin"):
 
                     try:
                         msg = await self.bot.wait_for(
-                            "message", timeout=60.0, check=confirm_check
+                            "message", timeout=120.0, check=confirm_check
                         )
                         if msg.content.upper() == "NA":
                             is_na = True
@@ -125,6 +129,8 @@ class AdminCog(commands.Cog, name="Admin"):
                 if "[*]" in title:
                     title_parts = title.split("[")
                     name = title_parts[1].strip()
+                    if name == "":
+                        return await ctx.send("Empty name detected.")
                     player = VotedPlayer(
                         name=name, id=discord_id, suggested=True, na=is_na
                     )
@@ -132,6 +138,8 @@ class AdminCog(commands.Cog, name="Admin"):
                 else:
                     title_parts = title.split("[")
                     name = title_parts[1][:-1].strip()
+                    if name == "":
+                        return await ctx.send("Empty name detected.")
                     player = VotedPlayer(name=name, id=discord_id, na=is_na)
                     players_voted_on.append(player)
 
@@ -185,16 +193,19 @@ class AdminCog(commands.Cog, name="Admin"):
             "*Vote ratio is between -2 and 2. "
             "It is your votes summed up divided by the amount of ballots. "
             "Followed is the exact amount of different kind of votes you got in order "
-            "(-2/-1/+1/+2)*\n\n-- **Players in +1** --\n\n"
+            f"(-2/-1/+1/+2)*\n\n-- **Players in +{'2' if plus_two else '1'}** --\n\n"
         ]
-        to_be_said_suggested_players = ["\n-- **Players suggested to +1** --\n\n"]
+        suggest_string = (
+            "\n-- **Players suggested to +2** --\n\n"
+            if plus_two
+            else "\n-- **Players suggested to +1** --\n\n"
+        )
+        to_be_said_suggested_players = [suggest_string]
 
         total_ratios = 0.0
         for player in players_voted_on:
             vote_ratio = player.get_vote_ratio()
             total_ratios += float(vote_ratio)
-            eu_vote_ratio = player.get_regional_vote_ratio(False)
-            na_vote_ratio = eu_vote_ratio = player.get_regional_vote_ratio(True)
 
             if player.suggested:
                 to_be_said_suggested_players.append(f"{str(player)}\n")
@@ -210,16 +221,14 @@ class AdminCog(commands.Cog, name="Admin"):
             f"Average: {'%+.2f' % round(average_score_ratio, 2)}*"
         )
 
-        # voting_result_channel = self.bot.get_channel(ids.PLUSONE_VOTING_RESULT_CHANNEL_ID)
-        # if voting_result_channel is None:
-        #     voting_result_channel = await self.bot.fetch_channel(ids.PLUSONE_VOTING_RESULT_CHANNEL_ID)
-        voting_result_channel = self.bot.get_channel(
-            ids.PLUSONE_VOTING_RESULT_CHANNEL_ID
+        results_channel_id = (
+            ids.PLUSTWO_VOTING_RESULT_CHANNEL_ID
+            if plus_two
+            else ids.PLUSONE_VOTING_RESULT_CHANNEL_ID
         )
+        voting_result_channel = self.bot.get_channel(results_channel_id)
         if voting_result_channel is None:
-            voting_result_channel = await self.bot.fetch_channel(
-                ids.PLUSONE_VOTING_RESULT_CHANNEL_ID
-            )
+            voting_result_channel = await self.bot.fetch_channel(results_channel_id)
 
         await voting_result_channel.set_permissions(
             plusone.default_role,
