@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import os
 import gspread
+import pymongo
 import asyncio
 from datetime import datetime
 from oauth2client.service_account import ServiceAccountCredentials
@@ -10,6 +11,7 @@ from .utils import ids
 from .utils.classes.VotedPlayer import VotedPlayer
 from .utils.helper import split_to_shorter_parts
 from .utils.lists import weapons
+from .utils.config import MONGO_URI
 
 
 class AdminCog(commands.Cog, name="Admin"):
@@ -23,8 +25,8 @@ class AdminCog(commands.Cog, name="Admin"):
         return ctx.message.author.id == ids.OWNER_ID
 
     @commands.command(name="test")
-    async def test_command(self, ctx, *, weapon):
-        await ctx.send(f"{weapon}")
+    async def test_command(self, ctx):
+        await ctx.send("test!")
 
     @commands.command(name="removeall")
     async def remove_role_from_members(self, ctx, role: discord.Role):

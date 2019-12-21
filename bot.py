@@ -6,7 +6,7 @@ from cogs.utils import config, ids, api
 
 INITIAL_EXTENSIONS = ("cogs.splatoon", "cogs.misc", "cogs.admin", "cogs.tourney")
 
-bot = commands.Bot(command_prefix=".", case_insensitive=True, max_messages=None)
+bot = commands.Bot(command_prefix=".", case_insensitive=True)
 
 if __name__ == "__main__":
     for extension in INITIAL_EXTENSIONS:
@@ -21,6 +21,37 @@ async def on_ready():
         f"\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n"
     )
     print(f"Successfully logged in and booted!")
+
+
+@bot.event
+async def on_member_join(member):
+    server_name = None
+    role = None
+    if member.guild.id == ids.PLUSONE_SERVER_ID:
+        server_name = "ONE"
+        role = member.guild.get_role(ids.PLUSONE_ACCESS_ROLE_ID)
+    elif member.guild.id == ids.PLUSTWO_SERVER_ID:
+        server_name = "TWO"
+        role = member.guild.get_role(ids.PLUSTWO_ACCESS_ROLE_ID)
+    else:
+        return
+
+    has_access = await bot.api.has_access(discord_id=str(member.id), server=server_name)
+
+    try:
+        if has_access == True:
+            await member.add_roles(role)
+        else:
+            await member.send(
+                f"You currently do not have access to {member.guild.name}"
+            )
+    except:
+        master_user = bot.get_user(ids.OWNER_ID)
+        if master_user is None:
+            master_user = await bot.fetch_user(ids.OWNER_ID)
+        await master_user.send(
+            f"Handling entry of {member.name} ({member.id}) to {member.guild.name} failed"
+        )
 
 
 @bot.check
@@ -57,10 +88,13 @@ async def on_error(event, *args, **kwargs):
     if master_user is None:
         master_user = await bot.fetch_user(ids.OWNER_ID)
     error_msg = f"```{traceback.format_exc()}```"
-    await master_user.send(
-        f"Error caused by this message from {context.message.author}:\n"
-        f"```{context.message.content}```"
-    )
+    if event == "on_command_error":
+        await master_user.send(
+            f"Error caused by this message from {context.message.author}:\n"
+            f"```{context.message.content}```"
+        )
+    else:
+        await master_user.send(f"Error happened with the code {event}")
     await master_user.send(error_msg[:2000])
     await context.send("Your command caused an error.")
 

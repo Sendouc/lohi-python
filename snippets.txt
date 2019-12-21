@@ -11,3 +11,53 @@
             await member.add_roles(roles[year_str])
             
         await ctx.send('all done!')
+
+### +1 and +2 stuff to MongoDB
+
+@commands.command(name="test")
+    async def test_command(self, ctx):
+        client = pymongo.MongoClient(MONGO_URI)
+        db = client.production
+        server = self.bot.get_guild(641203612118286336)
+        one_two = "TWO"
+
+        for member in server.members:
+            role_name = None
+            discord_id = str(member.id)
+            discriminator = member.discriminator
+            username = member.name
+            user_doc = db.users.find_one({"discord_id": discord_id})
+            for role in member.roles:
+                if role.name == "NA":
+                    role_name = "NA"
+                    break
+                elif role.name == "EU":
+                    role_name = "EU"
+                    break
+
+            if role_name is None:
+                continue
+
+            if user_doc is None:
+                doc = {
+                    "username": username,
+                    "discriminator": discriminator,
+                    "discord_id": discord_id,
+                    "plus": {"membership_status": one_two, "plus_region": role_name},
+                }
+
+                db.users.insert_one(doc)
+                print(f"Inserted {username}")
+            else:
+                db.users.update_one(
+                    {"discord_id": discord_id},
+                    {
+                        "$set": {
+                            "plus": {
+                                "membership_status": one_two,
+                                "plus_region": role_name,
+                            }
+                        }
+                    },
+                )
+                print(f"Updated {username}")

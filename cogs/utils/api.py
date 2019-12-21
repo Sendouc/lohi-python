@@ -1,9 +1,10 @@
 import aiohttp
 import time
 
-from .graphql import searchForBuildsByWeapon, maplists
+from .graphql import searchForBuildsByWeapon, maplists, hasAccess
 
-
+# creating a new session with every request considered bad practice with aiohttp but might still be
+# easiest for what we are doing (requests only rarely)
 class ApiConnecter:
     def __init__(self):
         self.graphql_server_url = "https://www.sendou.ink/graphql"
@@ -13,6 +14,8 @@ class ApiConnecter:
         self.salmon_run_data_fetch_time = None
 
     async def request_data(self, url: str) -> dict:
+        if self.session is None:
+            self.session = aiohttp.ClientSession()
         headers = {
             "User-Agent": "Lohi // Sendou#0043 on Discord // @Sendouc on Twitter"
         }
@@ -35,7 +38,7 @@ class ApiConnecter:
                     return r_dict["data"]
                 else:
                     raise Exception(
-                        f"Query failed to run by returning code of {r.status_code}. {query}"
+                        f"Query failed to run by returning code of {r.status}. {query}"
                     )
 
     async def get_rotation_data(self) -> dict:
@@ -82,3 +85,7 @@ class ApiConnecter:
     async def get_maplists(self) -> dict:
         response_dict = await self.sendou_ink_query(maplists)
         return response_dict["maplists"]
+
+    async def has_access(self, **kwargs) -> bool:
+        response_dict = await self.sendou_ink_query(hasAccess, kwargs)
+        return response_dict["hasAccess"]
