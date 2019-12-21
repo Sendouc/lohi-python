@@ -11,7 +11,6 @@ from .utils import ids
 from .utils.classes.VotedPlayer import VotedPlayer
 from .utils.helper import split_to_shorter_parts
 from .utils.lists import weapons
-from .utils.config import MONGO_URI
 
 
 class AdminCog(commands.Cog, name="Admin"):
