@@ -14,8 +14,6 @@ class ApiConnecter:
         self.salmon_run_data_fetch_time = None
 
     async def request_data(self, url: str) -> dict:
-        if self.session is None:
-            self.session = aiohttp.ClientSession()
         headers = {
             "User-Agent": "Lohi // Sendou#0043 on Discord // @Sendouc on Twitter"
         }
