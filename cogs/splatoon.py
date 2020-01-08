@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import time
+from datetime import datetime, timedelta
 
 from .utils.lists import (
     maps,
@@ -8,10 +9,12 @@ from .utils.lists import (
     mode_part_to_full,
     modes_to_emoji,
     weapons_to_emoji,
+    found_emoji,
 )
 from .utils.classes.LohiEmbed import LohiEmbed
 from .utils.helper import get_close_weapon, split_to_shorter_parts
 from .utils.map_generator import map_generation
+from .utils import ids
 
 
 class SplatoonCog(commands.Cog, name="Splatoon"):
@@ -333,6 +336,50 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
                 to_say += f"{emojis[0]}|{emojis[1]}|{emojis[2]}|{emojis[3]} - `{m}`\n"
         for msg in split_to_shorter_parts(to_say):
             await ctx.send(msg)
+
+    @commands.command(name="found", aliases=["f"])
+    async def mark_as_found(self, ctx, lfg_or_scrim=None):
+        remove_from_lfg = True
+        remove_from_scrim = True
+        if lfg_or_scrim is not None:
+            arg = lfg_or_scrim.upper()
+            if arg not in ["LFG", "SCRIM"]:
+                return ctx.send(f"Expected argument to be LFG or SCRIM got: {arg}")
+
+            if arg == "LFG":
+                remove_from_scrim = False
+            elif arg == "SCRIM":
+                remove_from_lfg = False
+
+        marked_as_found_count = 0
+
+        three_hours_ago = datetime.now() - timedelta(hours=3)
+        if remove_from_scrim:
+            for channel_id in ids.PLUS_SCRIM_CHANNEL_IDS:
+                channel = self.bot.get_channel(channel_id)
+                async for message in channel.history(after=three_hours_ago):
+                    if message.author.id == ctx.message.author.id:
+                        await message.add_reaction(found_emoji)
+                        marked_as_found_count += 1
+
+        if remove_from_lfg:
+            for channel_id in ids.PLUS_LFG_CHANNEL_IDS:
+                channel = self.bot.get_channel(channel_id)
+                async for message in channel.history(after=three_hours_ago):
+                    if message.author.id == ctx.message.author.id:
+                        await message.add_reaction(found_emoji)
+                        marked_as_found_count += 1
+
+        s = ""
+        if marked_as_found_count > 1:
+            s = "s"
+        if marked_as_found_count == 0:
+            return await ctx.send(
+                "No messages found that need to be marked with the found emoji."
+            )
+        await ctx.send(
+            f"All done! {marked_as_found_count} message{s} marked with the found emoji."
+        )
 
 
 def setup(bot):
