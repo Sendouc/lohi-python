@@ -359,16 +359,18 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
                 channel = self.bot.get_channel(channel_id)
                 async for message in channel.history(after=three_hours_ago):
                     if message.author.id == ctx.message.author.id:
-                        await message.add_reaction(found_emoji)
-                        marked_as_found_count += 1
+                        if len(message.reactions) == 0:
+                            await message.add_reaction(found_emoji)
+                            marked_as_found_count += 1
 
         if remove_from_lfg:
             for channel_id in ids.PLUS_LFG_CHANNEL_IDS:
                 channel = self.bot.get_channel(channel_id)
                 async for message in channel.history(after=three_hours_ago):
                     if message.author.id == ctx.message.author.id:
-                        await message.add_reaction(found_emoji)
-                        marked_as_found_count += 1
+                        if len(message.reactions) == 0:
+                            await message.add_reaction(found_emoji)
+                            marked_as_found_count += 1
 
         s = ""
         if marked_as_found_count > 1:
