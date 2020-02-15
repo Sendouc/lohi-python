@@ -23,37 +23,6 @@ async def on_ready():
     print(f"Successfully logged in and booted!")
 
 
-@bot.event
-async def on_member_join(member):
-    server_name = None
-    role = None
-    if member.guild.id == ids.PLUSONE_SERVER_ID:
-        server_name = "ONE"
-        role = member.guild.get_role(ids.PLUSONE_ACCESS_ROLE_ID)
-    elif member.guild.id == ids.PLUSTWO_SERVER_ID:
-        server_name = "TWO"
-        role = member.guild.get_role(ids.PLUSTWO_ACCESS_ROLE_ID)
-    else:
-        return
-
-    has_access = await bot.api.has_access(discord_id=str(member.id), server=server_name)
-
-    try:
-        if has_access == True:
-            await member.add_roles(role)
-        else:
-            await member.send(
-                f"You currently do not have access to {member.guild.name}"
-            )
-    except:
-        master_user = bot.get_user(ids.OWNER_ID)
-        if master_user is None:
-            master_user = await bot.fetch_user(ids.OWNER_ID)
-        await master_user.send(
-            f"Handling entry of {member.name} ({member.id}) to {member.guild.name} failed"
-        )
-
-
 @bot.check
 async def check_if_channel_white_listed(ctx):
     """

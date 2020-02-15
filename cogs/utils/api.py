@@ -85,7 +85,7 @@ class ApiConnecter:
         response_dict = await self.sendou_ink_query(maplists)
         return response_dict["maplists"]
 
-    async def has_access(self, **kwargs) -> bool:
+    async def has_access(self, **kwargs) -> str:
         response_dict = await self.sendou_ink_query(hasAccess, kwargs)
         return response_dict["hasAccess"]
 

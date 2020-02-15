@@ -49,8 +49,8 @@ maplists = """
 """
 
 hasAccess = """
-query hasAccess($discord_id: String!, $server: String!) {
-  hasAccess(discord_id: $discord_id, server: $server) 
+query hasAccess($discord_id: String!) {
+  hasAccess(discord_id: $discord_id) 
 }
 """
 

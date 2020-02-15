@@ -443,6 +443,32 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
 
         await ctx.send(f"Removed all XP roles from you, {ctx.message.author.name}")
 
+    @commands.command(name="access")
+    @commands.check(is_in_plus_server)
+    async def gain_plus_access_role(self, ctx):
+        """
+        Gives you the +1 or +2 role if you should have either
+        """
+        has_access = await self.bot.api.has_access(
+            discord_id=str(ctx.message.author.id)
+        )
+
+        if has_access is None:
+            return await ctx.send(
+                f"You currently don't have access to +1 or +2, {ctx.message.author.name}"
+            )
+        elif has_access == "TWO":
+            role = ctx.guild.get_role(ids.PLUSTWO_ACCESS_ROLE_ID)
+        elif has_access == "ONE":
+            role = ctx.guild.get_role(ids.PLUSONE_ACCESS_ROLE_ID)
+        else:
+            return await ctx.send(
+                f"Hmm something unexpected happened, {ctx.message.author.name}. Ask Sendou what's up."
+            )
+
+        await ctx.message.author.add_roles(role)
+        await ctx.send(f"Access granted, {ctx.message.author.name}")
+
 
 def setup(bot):
     bot.add_cog(SplatoonCog(bot))
