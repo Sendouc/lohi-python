@@ -21,6 +21,9 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
     def __init__(self, bot):
         self.bot = bot
 
+    async def is_in_plus_server(ctx):
+        return ctx.message.guild and ctx.message.guild.id == ids.PLUSONE_SERVER_ID
+
     def get_rotation_lines(self, ok_maps: set, ok_modes: set, rotations: list) -> str:
         game_mode = rotations[0]["game_mode"]["name"]
         to_be_returned = [f"{modes_to_emoji[game_mode]} `{game_mode}`\n\n"]
@@ -384,6 +387,7 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
         )
 
     @commands.command(name="xp")
+    @commands.check(is_in_plus_server)
     async def give_xrank_roles(self, ctx):
         """
         Assings XP roles to you based on sendou.ink data
@@ -420,6 +424,7 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
         await ctx.send(f"Assigned all XP roles to you, {ctx.message.author.name}")
 
     @commands.command(name="xpremove")
+    @commands.check(is_in_plus_server)
     async def remove_xrank_roles(self, ctx):
         """
         Removes all XP roles from you
