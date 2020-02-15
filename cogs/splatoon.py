@@ -383,6 +383,61 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             f"All done! {marked_as_found_count} message{s} marked with the found emoji."
         )
 
+    @commands.command(name="xp")
+    async def give_xrank_roles(self, ctx):
+        """
+        Assings XP roles to you based on sendou.ink data
+        """
+
+        modes = ["SZ", "TC", "RM", "CB"]
+        x_powers = await self.bot.api.x_powers(discord_id=str(ctx.message.author.id))
+        roles_given = 0
+
+        for role in ctx.message.author.roles:
+            if "!" not in role.name and "XP" in role.name:
+                await ctx.message.author.remove_roles(role)
+
+        for index, xp in enumerate(x_powers):
+            if xp is None:
+                continue
+
+            role_name = f"XP{xp} ({modes[index]})"
+
+            for role in ctx.message.guild.roles:
+                if role.name == role_name:
+                    await ctx.message.author.add_roles(role)
+                    roles_given += 1
+
+        if roles_given == 0:
+            return await ctx.send(
+                "I didn't find any Top 500 results from sendou.ink. Have you already registered on the site and followed the instructions on your user profile?"
+            )
+        elif roles_given == 1:
+            return await ctx.send(
+                f"Assigned one XP role to you, {ctx.message.author.name}"
+            )
+
+        await ctx.send(f"Assigned all XP roles to you, {ctx.message.author.name}")
+
+    @commands.command(name="xpremove")
+    async def remove_xrank_roles(self, ctx):
+        """
+        Removes all XP roles from you
+        """
+        roles_removed = 0
+
+        for role in ctx.message.author.roles:
+            if "!" not in role.name and "XP" in role.name:
+                await ctx.message.author.remove_roles(role)
+                roles_removed += 1
+
+        if roles_removed == 0:
+            return await ctx.send(
+                f"Didn't find any roles to remove, {ctx.message.author.name}"
+            )
+
+        await ctx.send(f"Removed all XP roles from you, {ctx.message.author.name}")
+
 
 def setup(bot):
     bot.add_cog(SplatoonCog(bot))

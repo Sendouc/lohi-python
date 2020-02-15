@@ -53,3 +53,9 @@ query hasAccess($discord_id: String!, $server: String!) {
   hasAccess(discord_id: $discord_id, server: $server) 
 }
 """
+
+xPowers = """
+query xPowers($discord_id: String!) {
+  xPowers(discord_id: $discord_id) 
+}
+"""

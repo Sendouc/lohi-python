@@ -1,7 +1,8 @@
 import aiohttp
 import time
+from typing import List
 
-from .graphql import searchForBuildsByWeapon, maplists, hasAccess
+from .graphql import searchForBuildsByWeapon, maplists, hasAccess, xPowers
 
 # creating a new session with every request considered bad practice with aiohttp but might still be
 # easiest for what we are doing (requests only rarely)
@@ -87,3 +88,7 @@ class ApiConnecter:
     async def has_access(self, **kwargs) -> bool:
         response_dict = await self.sendou_ink_query(hasAccess, kwargs)
         return response_dict["hasAccess"]
+
+    async def x_powers(self, **kwargs) -> List[int]:
+        response_dict = await self.sendou_ink_query(xPowers, kwargs)
+        return response_dict["xPowers"]
