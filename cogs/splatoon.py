@@ -486,7 +486,7 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
 
     @commands.command(name="publicpings")
     @commands.check(is_in_plus_server)
-    async def gain_or_lose_plustwo_pings_role(self, ctx):
+    async def gain_or_lose_public_pings_role(self, ctx):
         """
         Gives or removes the Public Pings role
         """
