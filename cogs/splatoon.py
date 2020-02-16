@@ -469,6 +469,36 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
         await ctx.message.author.add_roles(role)
         await ctx.send(f"Access granted, {ctx.message.author.name}")
 
+    @commands.command(name="plustwopings")
+    @commands.check(is_in_plus_server)
+    async def gain_or_lose_plustwo_pings_role(self, ctx):
+        """
+        Gives or removes the +2 Pings role
+        """
+        role = ctx.guild.get_role(678602424314888224)
+
+        if role in ctx.message.author.roles:
+            await ctx.message.author.remove_roles(role)
+            await ctx.send(f"+2 Pings role removed, {ctx.message.author.name}")
+        else:
+            await ctx.message.author.add_roles(role)
+            await ctx.send(f"+2 Pings role assigned, {ctx.message.author.name}")
+
+    @commands.command(name="publicpings")
+    @commands.check(is_in_plus_server)
+    async def gain_or_lose_plustwo_pings_role(self, ctx):
+        """
+        Gives or removes the Public Pings role
+        """
+        role = ctx.guild.get_role(678602504614707201)
+
+        if role in ctx.message.author.roles:
+            await ctx.message.author.remove_roles(role)
+            await ctx.send(f"Public Pings role removed, {ctx.message.author.name}")
+        else:
+            await ctx.message.author.add_roles(role)
+            await ctx.send(f"Public Pings role assigned, {ctx.message.author.name}")
+
 
 def setup(bot):
     bot.add_cog(SplatoonCog(bot))
