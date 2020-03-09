@@ -28,7 +28,7 @@ class MiscCog(commands.Cog, name="Misc"):
 
         if ctx.message.guild.id == ids.PLUSONE_SERVER_ID:
             for role in ctx.message.author.roles:
-                if role.name == "+1":
+                if role.name == "Plus 1":
                     return True
             return False
 
