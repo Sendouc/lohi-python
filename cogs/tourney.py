@@ -37,7 +37,7 @@ class TournamentCog(commands.Cog):
         """
         After registering on Challonge gives you the roles
         needed for the tournament.
-        Example usage: .idk "Team Olive" 0109-3838-9398
+        Example usage: .roles "Team Olive" 0109-3838-9398
         (notice the " " around the team name)
         """
         if team_name is None:
