@@ -70,10 +70,9 @@ class TournamentCog(commands.Cog):
 
         team_name_for_role = f"{found_name} 🏆"
 
-        matched = re.match("[0-9]{4}-[0-9]{4}-[0-9]{4}", friend_code)
+        matched = re.match(r"^[0-9]{4}-[0-9]{4}-[0-9]{4}$", friend_code)
 
         if not bool(matched):
-            print(matched)
             return await ctx.send(
                 f"Invalid friend code provided. Please follow the pattern: 1234-1234-1234"
             )
