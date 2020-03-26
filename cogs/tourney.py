@@ -66,7 +66,7 @@ class TournamentCog(commands.Cog):
                 f"No team called {team_name} found. Make sure you are registered to tournament on Challonge."
             )
 
-        found_name = found_name[:30]
+        found_name = found_name[:50]
 
         team_name_for_role = f"{found_name} 🏆"
 
