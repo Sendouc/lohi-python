@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 import asyncio
+import challonge
+import re
 from math import log, ceil
 
 from .utils import ids
@@ -9,6 +11,9 @@ from .utils.map_generator import map_generation
 from .utils.lists import maps, modes_to_emoji
 from .utils.helper import split_to_shorter_parts
 
+TOURNAMENT_URL = "InTheZone15"
+TOURNAMENT_PARTICIPANT_ROLE_NAME = "Tournament Participant"
+
 
 class TournamentCog(commands.Cog):
     def __init__(self, bot):
@@ -16,64 +21,86 @@ class TournamentCog(commands.Cog):
 
     async def cog_check(self, ctx):
         """ 
-        These commands can be used only by members with
-        the "Staff" role.
+        These commands can only be used in the Sendou server.
         """
         STAFF_ROLE_NAME = "Staff"
 
-        if ctx.message.guild is None:
+        if not ctx.message.guild or ctx.message.guild.id != ids.SENDOU_SERVER_ID:
             return False
 
-        if ctx.message.guild.id != ids.SENDOU_SERVER_ID:
-            return False
+        return True
 
-        for r in ctx.message.author.roles:
-            if r.name == STAFF_ROLE_NAME:
-                return True
-
-        return False
-
-    @commands.command(name="part")
-    async def change_name_and_give_participant_role(
-        self, ctx, member: discord.Member, team_name: str, new_name: str = None
+    @commands.command(name="roles")
+    async def give_tournament_roles(
+        self, ctx, team_name: str = None, friend_code: str = None
     ):
         """
-        Changes the participant name to fit the format
-        and gives them the participant role.
-        Example usage: .part Sendou#0043 "Team Olive"
+        After registering on Challonge gives you the roles
+        needed for the tournament.
+        Example usage: .idk "Team Olive" 0109-3838-9398
         (notice the " " around the team name)
         """
-        TOURNAMENT_PARTICIPANT_ROLE_NAME = "Tournament Participant"
+        if team_name is None:
+            await ctx.send("No team name provided.")
+        if friend_code is None:
+            await ctx.send("No friend code provided.")
+        user = await challonge.get_user(
+            config.CHALLONGE_ACCOUNT_NAME, config.CHALLONGE_TOKEN
+        )
+        tournament = await user.get_tournament(url=TOURNAMENT_URL, subdomain="sendous")
+        participants = await tournament.get_participants()
+        team_name_normalized = " ".join(team_name.split()).upper()
 
-        if not member:
-            return await ctx.send("Member with that name couldn't be found.")
+        found_name = None
+        for participant in participants:
+            participant_name = " ".join(participant.display_name.split()).upper()
+            if team_name_normalized in participant_name:
+                if found_name is not None:
+                    return await ctx.send(
+                        f"It seems that '{team_name}' can refer to two different teams. Please use unambiguous name."
+                    )
+                found_name = " ".join(participant.display_name.split())
 
-        for r in ctx.message.guild.roles:
-            if r.name == TOURNAMENT_PARTICIPANT_ROLE_NAME:
-                role = r
-
-        # Checking if another member of this team already claimed a role
-        for team_captain in role.members:
-            existing_team_name = team_captain.nick.split("[")[1].split("]")[0]
-            if team_name.upper() == existing_team_name.upper():
-                return await ctx.send(f"There already is a captain for {team_name}")
-
-        if len(team_name) > 30:
+        if found_name is None:
             return await ctx.send(
-                f"Team name is too long. It has be to be 30 or less but it was {len(team_name)} characters long."
+                f"No team called {team_name} found. Make sure you are registered to tournament on Challonge."
             )
 
-        await member.add_roles(role)
+        found_name = found_name[:30]
 
-        if new_name is None:
-            new_name = member.name
+        team_name_for_role = f"{found_name} 🏆"
 
-        new_nick = f"[{team_name}] {new_name}"[:32]
+        matched = re.match("[0-9]{4}-[0-9]{4}-[0-9]{4}", friend_code)
 
-        await member.edit(nick=new_nick)
-        await ctx.send(f"Done! New nickname: {new_nick}")
+        if not bool(matched):
+            print(matched)
+            return await ctx.send(
+                f"Invalid friend code provided. Please follow the pattern: 1234-1234-1234"
+            )
+
+        participant_role = None
+
+        for r in ctx.message.guild.roles:
+            if r.name == team_name_for_role:
+                return await ctx.send("This team already has a captain.")
+            elif r.name == friend_code:
+                return await ctx.send("This friend code is already in use.")
+            if r.name == TOURNAMENT_PARTICIPANT_ROLE_NAME:
+                participant_role = r
+
+        team_role = await ctx.message.guild.create_role(
+            name=team_name_for_role, mentionable=True
+        )
+        fc_role = await ctx.message.guild.create_role(name=friend_code)
+
+        await ctx.message.author.add_roles(participant_role, team_role, fc_role)
+
+        await ctx.send(
+            f"All done. Enjoy the tournament and don't forget to check-in from 1 hour before the tournament starts!"
+        )
 
     @commands.command(name="tourneymaps")
+    @commands.is_owner()
     async def generate_and_post_maps_for_tournament(
         self, ctx, amount_of_teams: int, ruleset: str = "ITZ"
     ):
