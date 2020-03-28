@@ -13,11 +13,14 @@ from .utils.helper import split_to_shorter_parts
 
 TOURNAMENT_URL = "InTheZone15"
 TOURNAMENT_PARTICIPANT_ROLE_NAME = "Registered"
+REGISTERED_ROLE_ID = 409130904418516994
+CHECKED_IN_ROLE_ID = 692878166070394950
 
 
 class TournamentCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.checkin_open = False
 
     async def cog_check(self, ctx):
         """ 
@@ -97,6 +100,116 @@ class TournamentCog(commands.Cog):
         await ctx.send(
             f"All done. Thank you for registering. Don't forget the check-in that begins 1 hour before the tournament is scheduled to start!"
         )
+
+    @commands.command(name="checkin")
+    @commands.has_role("Registered")
+    async def check_in_for_tournament(self, ctx):
+        if not self.checkin_open:
+            return await ctx.send("Check-in is not open yet")
+        registered_role = ctx.message.guild.get_role(REGISTERED_ROLE_ID)
+        checked_in_role = ctx.message.guild.get_role(CHECKED_IN_ROLE_ID)
+        await ctx.message.author.add_roles(checked_in_role)
+        await ctx.message.author.remove_roles(registered_role)
+        await ctx.message.add_reaction("✅")
+
+    @commands.command(name="togglecheckin")
+    @commands.has_role("Staff")
+    async def toggle_check_in_bool(self, ctx):
+        self.checkin_open = not self.checkin_open
+        if not self.checkin_open:
+            await ctx.send("Check-in is now closed")
+        else:
+            await ctx.send("Check-in is now open")
+
+    @commands.command(name="checkedin")
+    @commands.has_role("Staff")
+    async def toggle_check_in_bool(self, ctx):
+        user = await challonge.get_user(
+            config.CHALLONGE_ACCOUNT_NAME, config.CHALLONGE_TOKEN
+        )
+        tournament = await user.get_tournament(url=TOURNAMENT_URL, subdomain="sendous")
+        participants = await tournament.get_participants()
+        checked_in_teams = []
+        registered_teams = []
+        no_role_teams = []
+        not_on_challonge_teams = []
+        left_server = []
+        checked_in_role = ctx.message.guild.get_role(CHECKED_IN_ROLE_ID)
+        registered_role = ctx.message.guild.get_role(REGISTERED_ROLE_ID)
+
+        guild_roles = ctx.message.guild.roles
+
+        for participant in participants:
+            team_name = " ".join(participant.display_name.split())
+            role_name = f"{team_name} 🏆"
+
+            found = False
+            for r in guild_roles:
+
+                if r.name == role_name:
+                    if len(r.members) == 0:
+                        left_server.append(role_name)
+                        found = True
+                    else:
+                        for users_role in r.members[0].roles:
+                            if users_role.id == REGISTERED_ROLE_ID:
+                                registered_teams.append(team_name)
+                                found = True
+                                continue
+                            elif users_role.id == CHECKED_IN_ROLE_ID:
+                                checked_in_teams.append(team_name)
+                                found = True
+                                continue
+
+                if found:
+                    break
+
+            if not found:
+                no_role_teams.append(team_name)
+
+        for r in guild_roles:
+            if "🏆" in r.name:
+                team_name = " ".join(r.name.replace(" 🏆", "").split())
+
+            if (
+                team_name not in checked_in_teams
+                and team_name not in registered_teams
+                and team_name not in no_role_teams
+                and team_name not in left_server
+            ):
+                not_on_challonge_teams.append(team_name)
+
+        to_be_said = []
+
+        if len(checked_in_teams) > 0:
+            to_be_said.append(f"✅ **Checked in ({len(checked_in_teams)})**")
+            to_be_said.append("\n".join(checked_in_teams))
+
+        if len(registered_teams) > 0:
+            to_be_said.append(
+                f"\n⚠️ **Has registered roles ({len(registered_teams)})**"
+            )
+            to_be_said.append("\n".join(registered_teams))
+
+        if len(no_role_teams) > 0:
+            to_be_said.append(
+                f"\n❌ **Registered on challonge but claimed no roles ({len(no_role_teams)})**"
+            )
+            to_be_said.append("\n".join(no_role_teams))
+
+        if len(not_on_challonge_teams) > 0:
+            to_be_said.append(
+                f"\n❓ **Has roles but changed name on Challonge ({len(not_on_challonge_teams)})**"
+            )
+            to_be_said.append("\n".join(not_on_challonge_teams))
+
+        if len(left_server) > 0:
+            to_be_said.append(f"\n👻 **Left server ({len(left_server)})**")
+            to_be_said.append("\n".join(left_server))
+
+        to_be_said.append(f"\n\n*{len(participants)} teams on Challonge*")
+
+        await ctx.send("\n".join(to_be_said))
 
     @commands.command(name="tourneymaps")
     @commands.is_owner()
