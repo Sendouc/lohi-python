@@ -20,7 +20,7 @@ CHECKED_IN_ROLE_ID = 692878166070394950
 class TournamentCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.checkin_open = True
+        self.checkin_open = False
 
     async def cog_check(self, ctx):
         """ 
@@ -44,9 +44,9 @@ class TournamentCog(commands.Cog):
         (notice the " " around the team name)
         """
         if team_name is None:
-            await ctx.send("No team name provided.")
+            return await ctx.send("No team name provided.")
         if friend_code is None:
-            await ctx.send("No friend code provided.")
+            return await ctx.send("No friend code provided.")
         user = await challonge.get_user(
             config.CHALLONGE_ACCOUNT_NAME, config.CHALLONGE_TOKEN
         )
@@ -124,7 +124,7 @@ class TournamentCog(commands.Cog):
 
     @commands.command(name="checkedin")
     @commands.has_role("Staff")
-    async def toggle_check_in_bool(self, ctx):
+    async def display_check_in_summary(self, ctx):
         user = await challonge.get_user(
             config.CHALLONGE_ACCOUNT_NAME, config.CHALLONGE_TOKEN
         )
@@ -179,8 +179,6 @@ class TournamentCog(commands.Cog):
                 and team_name not in left_server
                 and team_name not in not_on_challonge_teams
             ):
-                print(registered_teams)
-                print(f"'{team_name} '")
                 not_on_challonge_teams.append(team_name)
 
         to_be_said = []
@@ -214,6 +212,26 @@ class TournamentCog(commands.Cog):
         to_be_said.append(f"\n\n*{len(participants)} teams on Challonge*")
 
         await ctx.send("\n".join(to_be_said))
+
+    @commands.command(name="cleanup")
+    @commands.is_owner()
+    async def cleanup_after_tournament(self, ctx):
+        checked_in_role = ctx.message.guild.get_role(CHECKED_IN_ROLE_ID)
+        registered_role = ctx.message.guild.get_role(REGISTERED_ROLE_ID)
+
+        for member in checked_in_role.members:
+            await member.remove_roles(checked_in_role)
+
+        for member in checked_in_role.members:
+            await member.remove_roles(checked_in_role)
+
+        roles_deleted = 0
+        for role in ctx.message.guild.roles:
+            if "🏆" in role.name or re.match(r"^[0-9]{4}-[0-9]{4}-[0-9]{4}$", role.name):
+                await role.delete()
+                roles_deleted += 1
+
+        await ctx.send(f"All done cleaning up. Deleted {roles_deleted} roles.")
 
     @commands.command(name="tourneymaps")
     @commands.is_owner()
