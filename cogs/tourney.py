@@ -12,7 +12,7 @@ from .utils.lists import maps, modes_to_emoji
 from .utils.helper import split_to_shorter_parts
 
 TOURNAMENT_URL = "InTheZone15"
-TOURNAMENT_PARTICIPANT_ROLE_NAME = "Tournament Participant"
+TOURNAMENT_PARTICIPANT_ROLE_NAME = "Registered"
 
 
 class TournamentCog(commands.Cog):
@@ -95,7 +95,7 @@ class TournamentCog(commands.Cog):
         await ctx.message.author.add_roles(participant_role, team_role, fc_role)
 
         await ctx.send(
-            f"All done. Enjoy the tournament and don't forget to check-in from 1 hour before the tournament starts!"
+            f"All done. Thank you for registering. Don't forget the check-in that begins 1 hour before the tournament is scheduled to start!"
         )
 
     @commands.command(name="tourneymaps")
