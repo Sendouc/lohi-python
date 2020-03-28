@@ -222,8 +222,8 @@ class TournamentCog(commands.Cog):
         for member in checked_in_role.members:
             await member.remove_roles(checked_in_role)
 
-        for member in checked_in_role.members:
-            await member.remove_roles(checked_in_role)
+        for member in registered_role.members:
+            await member.remove_roles(registered_role)
 
         roles_deleted = 0
         for role in ctx.message.guild.roles:
