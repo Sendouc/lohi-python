@@ -60,7 +60,7 @@ class TournamentCog(commands.Cog):
             if team_name_normalized in participant_name:
                 if found_name is not None:
                     return await ctx.send(
-                        f"It seems that '{team_name}' can refer to two different teams. Please use unambiguous name."
+                        f"It seems that '{team_name}' can refer to two different teams. Please use an unambiguous name."
                     )
                 found_name = " ".join(participant.display_name.split())
 
@@ -77,7 +77,7 @@ class TournamentCog(commands.Cog):
 
         if not bool(matched):
             return await ctx.send(
-                f"Invalid friend code provided. Please follow the pattern: 1234-1234-1234"
+                f"Invalid friend code provided: '{friend_code}'. Please follow the pattern: 1234-1234-1234"
             )
 
         participant_role = None
@@ -225,8 +225,7 @@ class TournamentCog(commands.Cog):
             return await ctx.send(f"{ruleset} is not a valid ruleset.")
 
         L2 = log(amount_of_teams, 2)
-        # Winners includes grand finals + bracket reset
-        winner_map_amount = ceil(L2) + 1
+        winner_map_amount = ceil(L2)
         loser_map_amount = ceil(L2) + ceil(log(L2, 2))
 
         games = []
@@ -237,20 +236,12 @@ class TournamentCog(commands.Cog):
             winner_map_amount -= 2
             loser_map_amount -= 1
             while winner_map_amount > 0 or loser_map_amount > 0:
-                if winner_map_amount == 1:
-                    games.extend([7, 7])
-                    games_enum.extend(["WINNER", "WINNER"])
-                    winner_map_amount -= 1
-                elif winner_map_amount > 0:
+                if winner_map_amount > 0:
                     games.append(5)
                     games_enum.append("WINNER")
                     winner_map_amount -= 1
 
-                if loser_map_amount == 1:
-                    games.append(5)
-                    games_enum.append("LOSER")
-                    loser_map_amount -= 1
-                elif loser_map_amount > 0:
+                if loser_map_amount > 0:
                     games.append(3)
                     games_enum.append("LOSER")
                     loser_map_amount -= 1
@@ -264,7 +255,7 @@ class TournamentCog(commands.Cog):
         winner_map_str = "__**WINNERS**__\n\n"
         losers_map_str = "__**LOSERS**__\n\n"
 
-        winner_map_count = ceil(L2) + 2
+        winner_map_count = ceil(L2)
         losers_round = 1
         winners_round = 1
         print_modes = ruleset.upper() not in ["ITZ", "DRAFT"]
@@ -281,12 +272,8 @@ class TournamentCog(commands.Cog):
                 losers_round += 1
             else:
                 title = f"Round {winners_round}"
-                if winner_map_count == 3:
+                if winner_map_count == 1:
                     title = "Semifinals"
-                elif winner_map_count == 2:
-                    title = "Finals"
-                elif winner_map_count == 1:
-                    title = "Finals (Bracket Reset)"
                 winner_map_str += f"{title}\n```"
                 for count, stage_tuple in enumerate(maplist, 1):
                     mode, stage = stage_tuple
@@ -302,6 +289,9 @@ class TournamentCog(commands.Cog):
             if ruleset.upper() in ["ITZ", "DRAFT"]
             else ""
         )
+        winner_map_str += "Grand Finals\n```Bo7 counterpicks (see #itz_rules-❓)```\nBracket Reset\n```Bo7 counterpicks (see #itz_rules-❓)```\n"
+
+        losers_map_str += "Losers Finals\n```Bo5 counterpicks (see #itz_rules-❓)```"
         for line in split_to_shorter_parts(
             before_all + winner_map_str + losers_map_str
         ):
