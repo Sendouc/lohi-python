@@ -20,7 +20,7 @@ CHECKED_IN_ROLE_ID = 692878166070394950
 class TournamentCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.checkin_open = False
+        self.checkin_open = True
 
     async def cog_check(self, ctx):
         """ 
@@ -115,6 +115,7 @@ class TournamentCog(commands.Cog):
     @commands.command(name="togglecheckin")
     @commands.has_role("Staff")
     async def toggle_check_in_bool(self, ctx):
+        print("what")
         self.checkin_open = not self.checkin_open
         if not self.checkin_open:
             await ctx.send("Check-in is now closed")
