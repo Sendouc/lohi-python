@@ -20,7 +20,7 @@ CHECKED_IN_ROLE_ID = 692878166070394950
 class TournamentCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.checkin_open = True
+        self.checkin_open = False
 
     async def cog_check(self, ctx):
         """ 
