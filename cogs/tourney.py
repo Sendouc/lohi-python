@@ -20,7 +20,7 @@ CHECKED_IN_ROLE_ID = 692878166070394950
 class TournamentCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.checkin_open = False
+        self.checkin_open = True
 
     async def cog_check(self, ctx):
         """ 
@@ -71,7 +71,7 @@ class TournamentCog(commands.Cog):
 
         found_name = found_name[:50]
 
-        team_name_for_role = f"{found_name} 🏆"
+        team_name_for_role = f"{found_name.trim()} 🏆"
 
         matched = re.match(r"^[0-9]{4}-[0-9]{4}-[0-9]{4}$", friend_code)
 
@@ -141,7 +141,7 @@ class TournamentCog(commands.Cog):
         guild_roles = ctx.message.guild.roles
 
         for participant in participants:
-            team_name = " ".join(participant.display_name.split())
+            team_name = " ".join(participant.display_name.split())[:50].strip()
             role_name = f"{team_name} 🏆"
 
             found = False
@@ -177,7 +177,10 @@ class TournamentCog(commands.Cog):
                 and team_name not in registered_teams
                 and team_name not in no_role_teams
                 and team_name not in left_server
+                and team_name not in not_on_challonge_teams
             ):
+                print(registered_teams)
+                print(f"'{team_name} '")
                 not_on_challonge_teams.append(team_name)
 
         to_be_said = []
@@ -194,13 +197,13 @@ class TournamentCog(commands.Cog):
 
         if len(no_role_teams) > 0:
             to_be_said.append(
-                f"\n❌ **Registered on challonge but claimed no roles ({len(no_role_teams)})**"
+                f"\n❌ **Registered on Challonge but claimed no roles ({len(no_role_teams)})**"
             )
             to_be_said.append("\n".join(no_role_teams))
 
         if len(not_on_challonge_teams) > 0:
             to_be_said.append(
-                f"\n❓ **Has roles but changed name on Challonge ({len(not_on_challonge_teams)})**"
+                f"\n❓ **Has roles but name not matching to anyone on Challonge ({len(not_on_challonge_teams)})**"
             )
             to_be_said.append("\n".join(not_on_challonge_teams))
 
