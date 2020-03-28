@@ -71,7 +71,7 @@ class TournamentCog(commands.Cog):
 
         found_name = found_name[:50]
 
-        team_name_for_role = f"{found_name.trim()} 🏆"
+        team_name_for_role = f"{found_name.strip()} 🏆"
 
         matched = re.match(r"^[0-9]{4}-[0-9]{4}-[0-9]{4}$", friend_code)
 
