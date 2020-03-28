@@ -8,7 +8,7 @@ from math import log, ceil
 from .utils import ids
 from .utils import config
 from .utils.map_generator import map_generation
-from .utils.lists import maps, modes_to_emoji
+from .utils.lists import maps, modes_to_emoji, itz_map_votes
 from .utils.helper import split_to_shorter_parts
 
 TOURNAMENT_URL = "InTheZone15"
@@ -256,7 +256,9 @@ class TournamentCog(commands.Cog):
                     loser_map_amount -= 1
 
         generated_maps = map_generation(
-            map_pool=events[ruleset]["map_pool"], games=games
+            map_pool=events[ruleset]["map_pool"],
+            games=games,
+            popularity={"sz": itz_map_votes},
         )
 
         winner_map_str = "__**WINNERS**__\n\n"
