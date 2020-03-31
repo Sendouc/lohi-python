@@ -26,8 +26,6 @@ class TournamentCog(commands.Cog):
         """ 
         These commands can only be used in the Sendou server.
         """
-        STAFF_ROLE_NAME = "Staff"
-
         if not ctx.message.guild or ctx.message.guild.id != ids.SENDOU_SERVER_ID:
             return False
 
