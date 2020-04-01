@@ -20,9 +20,7 @@ class SnipingCog(commands.Cog):
         guild = self.bot.get_guild(ids.PLUSONE_SERVER_ID)
         category = guild.get_channel(ids.LOBBYSNIPING_CATEGORY_ID)
         if self.snipe_loop.current_loop == 0:
-            print(self.snipe_loop.current_loop)
-            print(next_iteration)
-            await category.edit(name=f"Lobby Sniping 🎯 NEXT :{next_iteration.minute}")
+            await category.edit(name=f"Better Lobbies 🎯 NEXT :{next_iteration.minute}")
             return
         await channel.send(
             f"1 minute till it's time to queue up in solo <@&{ids.LOBBYSNIPE_ROLE_ID}>"
@@ -38,19 +36,19 @@ class SnipingCog(commands.Cog):
         await channel.send("1!")
         await asyncio.sleep(1)
         await channel.send("Go go go!")
-        await category.edit(name=f"Lobby Sniping 🎯 NEXT :{next_iteration.minute}")
+        await category.edit(name=f"Better Lobbies 🎯 NEXT :{next_iteration.minute}")
 
     @snipe_loop.after_loop
     async def on_cancel(self):
         guild = self.bot.get_guild(ids.PLUSONE_SERVER_ID)
         category = guild.get_channel(ids.LOBBYSNIPING_CATEGORY_ID)
-        await category.edit(name=f"Lobby Sniping 🎯 OFFLINE")
+        await category.edit(name=f"Better Lobbies 🎯 OFFLINE")
 
-    @commands.command(name="sniping")
+    @commands.command(name="solo")
     @commands.has_any_role(ids.PLUSONE_ACCESS_ROLE_ID, ids.PLUSTWO_ACCESS_ROLE_ID)
     async def give_or_take_sniping_role(self, ctx):
         """
-        Gives or removes the lobby sniping role.
+        Gives or removes the playing solo role.
         """
         role = ctx.guild.get_role(ids.LOBBYSNIPE_ROLE_ID)
 
@@ -69,8 +67,10 @@ class SnipingCog(commands.Cog):
         """
         if self.snipe_loop.current_loop > 0:
             self.snipe_loop.stop()
-            return
-        self.snipe_loop.start()
+        else:
+            self.snipe_loop.start()
+
+        await ctx.message.add_reaction("✅")
 
 
 def setup(bot):

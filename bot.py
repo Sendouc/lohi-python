@@ -9,6 +9,7 @@ INITIAL_EXTENSIONS = (
     "cogs.misc",
     "cogs.admin",
     "cogs.tourney",
+    "cogs.sniping",
 )
 
 bot = commands.Bot(command_prefix=".", case_insensitive=True)
