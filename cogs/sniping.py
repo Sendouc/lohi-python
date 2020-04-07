@@ -60,7 +60,7 @@ class SnipingCog(commands.Cog):
         await ctx.message.add_reaction("✅")
 
     @commands.command(name="snipe")
-    @commands.is_owner()
+    @commands.has_any_role(697077406271275100, 620382038511321093)
     async def start_or_stop_sniping_loop(self, ctx):
         """
         Start/stop sniping
@@ -69,6 +69,21 @@ class SnipingCog(commands.Cog):
             self.snipe_loop.stop()
         else:
             self.snipe_loop.start()
+
+        await ctx.message.add_reaction("✅")
+
+    @commands.command(name="solopings")
+    @commands.has_any_role(ids.PLUSONE_ACCESS_ROLE_ID, ids.PLUSTWO_ACCESS_ROLE_ID)
+    async def gain_or_lose_solo_pings_role(self, ctx):
+        """
+        Gives or removes the Solo Pings role
+        """
+        role = ctx.guild.get_role(697137519652896768)
+
+        if role in ctx.message.author.roles:
+            await ctx.message.author.remove_roles(role)
+        else:
+            await ctx.message.author.add_roles(role)
 
         await ctx.message.add_reaction("✅")
 
