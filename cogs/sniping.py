@@ -44,6 +44,10 @@ class SnipingCog(commands.Cog):
         category = guild.get_channel(ids.LOBBYSNIPING_CATEGORY_ID)
         await category.edit(name=f"Better Lobbies 🎯 OFFLINE")
 
+        role = guild.get_role(ids.LOBBYSNIPE_ROLE_ID)
+        for member in role.members:
+            await member.remove_roles(role)
+
     @commands.command(name="solo")
     @commands.has_any_role(ids.PLUSONE_ACCESS_ROLE_ID, ids.PLUSTWO_ACCESS_ROLE_ID)
     async def give_or_take_sniping_role(self, ctx):
