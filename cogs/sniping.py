@@ -91,6 +91,22 @@ class SnipingCog(commands.Cog):
 
         await ctx.message.add_reaction("✅")
 
+    @commands.command(name="viewsnipe")
+    @commands.has_any_role(ids.PLUSONE_ACCESS_ROLE_ID, ids.PLUSTWO_ACCESS_ROLE_ID)
+    async def gain_or_lose_lobby_snipe_view_role(self, ctx):
+        role_to_give = ctx.guild.get_role(ids.LOBBYSNIPE_ACCESS_ROLE_ID)
+        has_role = False
+        for role in ctx.message.author.roles:
+            if role.id == role_to_give.id:
+                has_role = True
+
+        if not has_role and ctx.message.author.id not in ids.NO_SNIPING:
+            await ctx.message.author.add_roles(role_to_give)
+            await ctx.message.add_reaction("✅")
+        elif has_role:
+            await ctx.message.author.remove_roles(role_to_give)
+            await ctx.message.add_reaction("✅")
+
 
 def setup(bot):
     bot.add_cog(SnipingCog(bot))

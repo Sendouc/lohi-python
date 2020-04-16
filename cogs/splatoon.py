@@ -453,6 +453,8 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             discord_id=str(ctx.message.author.id)
         )
 
+        lobby_sniping_role = ctx.guild.get_role(ids.LOBBYSNIPE_ACCESS_ROLE_ID)
+
         if has_access is None:
             return await ctx.send(
                 f"You currently don't have access to +1 or +2, {ctx.message.author.name}"
@@ -467,6 +469,8 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
             )
 
         await ctx.message.author.add_roles(role)
+        if ctx.message.author.id not in ids.NO_SNIPING:
+            await ctx.message.author.add_roles(lobby_sniping_role)
         await ctx.send(f"Access granted, {ctx.message.author.name}")
 
     @commands.command(name="plustwopings")
