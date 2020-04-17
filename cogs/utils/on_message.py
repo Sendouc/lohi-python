@@ -9,10 +9,14 @@ async def on_competitive_feed_post(message: discord, bot: commands.Bot):
     parts = message.clean_content.strip().split("\n")
     if len(parts) < 3:
         await message.delete()
-        return await comp_feed_info.send(
+        await comp_feed_info.send(
             f" {message.author.mention} your message was deleted because it doesn't follow the format. Please see the pins for an example."
         )
-    tournament_name = parts[0]
+        return await comp_feed_info.send(f"```{message.clean_content[:1990]}```")
+
+    tournament_name = (
+        parts[0].replace("*", "").replace("> ", "").replace("_", "").replace("`", "")
+    )
     iso_string = parts[1]
 
     description = "\n".join(parts[2:]).strip()
@@ -25,17 +29,19 @@ async def on_competitive_feed_post(message: discord, bot: commands.Bot):
 
     if discord_invite_url is None:
         await message.delete()
-        return await comp_feed_info.send(
-            f" {message.author.mention} your message was deleted because it didn't contain a valid Discord server link with the format `https://discord.gg/xxxxx`. Please see the pins for an example."
+        await comp_feed_info.send(
+            f" {message.author.mention} your message was deleted because it didn't contain a valid Discord server link with the format `https://discord.gg/asdasd`. Please see the pins for an example."
         )
+        return await comp_feed_info.send(f"```{message.clean_content[:1990]}```")
 
     try:
-        date = datetime.datetime.fromisoformat(iso_string)
+        date = datetime.datetime.fromisoformat(iso_string + "+00:00")
     except ValueError:
         await message.delete()
-        return await comp_feed_info.send(
+        await comp_feed_info.send(
             f" {message.author.mention} your message was deleted because the date `{iso_string}` is invalid. Please see the pins for an example."
         )
+        return await comp_feed_info.send(f"```{message.clean_content[:1990]}```")
 
     picture_url = None
     if len(message.attachments) > 0:
@@ -59,5 +65,11 @@ async def on_competitive_feed_post(message: discord, bot: commands.Bot):
 
     result = await bot.api.add_competitive_feed_event(**params)
 
-    if result:
-        await message.add_reaction("✅")
+    if not result:
+        await message.delete()
+        await comp_feed_info.send(
+            "Something went wrong. Most likely this tournament has already been posted."
+        )
+        return await comp_feed_info.send(f"```{message.clean_content[:1990]}```")
+
+    await message.add_reaction("✅")
