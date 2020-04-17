@@ -59,3 +59,15 @@ query xPowers($discord_id: String!) {
   xPowers(discord_id: $discord_id) 
 }
 """
+
+addCompetitiveFeedEvent = """
+mutation addCompetitiveFeedEvent(
+    $event: CompetitiveFeedEventInput!
+    $lohiToken: String!
+  ) {
+    addCompetitiveFeedEvent(
+      event: $event
+      lohiToken: $lohiToken
+    )
+  }
+"""

@@ -3,6 +3,7 @@ from discord.ext import commands
 import traceback
 
 from cogs.utils import config, ids, api
+from cogs.utils.on_message import on_competitive_feed_post
 
 INITIAL_EXTENSIONS = (
     "cogs.splatoon",
@@ -27,6 +28,13 @@ async def on_ready():
         f"\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n"
     )
     print(f"Successfully logged in and booted!")
+
+
+@bot.event
+async def on_message(message: discord.Message):
+    if message.author.id == ids.OWNER_ID:
+        # print(message.clean_content.split("\n"))
+        await on_competitive_feed_post(message, bot)
 
 
 @bot.check

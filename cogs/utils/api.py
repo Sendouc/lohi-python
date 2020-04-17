@@ -2,13 +2,20 @@ import aiohttp
 import time
 from typing import List
 
-from .graphql import searchForBuildsByWeapon, maplists, hasAccess, xPowers
+from .graphql import (
+    searchForBuildsByWeapon,
+    maplists,
+    hasAccess,
+    xPowers,
+    addCompetitiveFeedEvent,
+)
 
 # creating a new session with every request considered bad practice with aiohttp but might still be
 # easiest for what we are doing (requests only rarely)
 class ApiConnecter:
     def __init__(self):
-        self.graphql_server_url = "https://www.sendou.ink/graphql"
+        # self.graphql_server_url = "https://www.sendou.ink/graphql"
+        self.graphql_server_url = "http://localhost:3001/graphql"
         self.rotation_data = None
         self.rotation_data_fetch_time = None
         self.salmon_run_data = None
@@ -29,8 +36,7 @@ class ApiConnecter:
         # https://gist.github.com/gbaman/b3137e18c739e0cf98539bf4ec4366ad
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                "https://sendou.ink/graphql",
-                json={"query": query, "variables": variables},
+                self.graphql_server_url, json={"query": query, "variables": variables},
             ) as r:
                 if r.status == 200:
                     r_dict = await r.json()
@@ -92,3 +98,9 @@ class ApiConnecter:
     async def x_powers(self, **kwargs) -> List[int]:
         response_dict = await self.sendou_ink_query(xPowers, kwargs)
         return response_dict["xPowers"]
+
+    async def add_competitive_feed_event(self, **kwargs) -> bool:
+        response_dict = await self.sendou_ink_query(addCompetitiveFeedEvent, kwargs)
+        if response_dict is None:
+            return False
+        return response_dict["addCompetitiveFeedEvent"]
