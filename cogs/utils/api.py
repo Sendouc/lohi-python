@@ -14,8 +14,7 @@ from .graphql import (
 # easiest for what we are doing (requests only rarely)
 class ApiConnecter:
     def __init__(self):
-        # self.graphql_server_url = "https://www.sendou.ink/graphql"
-        self.graphql_server_url = "http://localhost:3001/graphql"
+        self.graphql_server_url = "https://www.sendou.ink/graphql"
         self.rotation_data = None
         self.rotation_data_fetch_time = None
         self.salmon_run_data = None
