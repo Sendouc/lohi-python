@@ -30,10 +30,10 @@ async def on_ready():
     print(f"Successfully logged in and booted!")
 
 
-@bot.event
-async def on_message(message: discord.Message):
-    if message.channel.id == ids.COMPETITIVE_FEED_CHANNEL:
-        await on_competitive_feed_post(message, bot)
+# @bot.event
+# async def on_message(message: discord.Message):
+# if message.channel.id == ids.COMPETITIVE_FEED_CHANNEL:
+#    await on_competitive_feed_post(message, bot)
 
 
 @bot.check
