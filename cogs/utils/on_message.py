@@ -68,7 +68,7 @@ async def on_competitive_feed_post(message: discord, bot: commands.Bot):
     if not result:
         await message.delete()
         await comp_feed_info.send(
-            "Something went wrong. Most likely this tournament has already been posted."
+            f"Something went wrong. One reason could be that a tournament called {tournament_name} was already posted or there is a bug Sendou should fix."
         )
         return await comp_feed_info.send(f"```{message.clean_content[:1990]}```")
 
