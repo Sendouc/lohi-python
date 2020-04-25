@@ -33,7 +33,7 @@ async def on_ready():
 @bot.event
 async def on_message(message: discord.Message):
     if message.author.bot:
-        await bot.process_commands(message)
+        return
 
     if message.channel.id == ids.COMPETITIVE_FEED_CHANNEL:
         await on_competitive_feed_post(message, bot)

@@ -246,7 +246,7 @@ class TournamentCog(commands.Cog):
 
         L2 = log(amount_of_teams, 2)
         winner_map_amount = ceil(L2)
-        loser_map_amount = ceil(L2) + ceil(log(L2, 2))
+        loser_map_amount = ceil(L2) + ceil(log(L2, 2)) - 1
 
         games = []
         games_enum = []
