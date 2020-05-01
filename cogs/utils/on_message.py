@@ -22,7 +22,7 @@ async def on_competitive_feed_post(message: discord, bot: commands.Bot):
     description = "\n".join(parts[2:]).strip()
     discord_invite_url = None
 
-    for word in description.split(" "):
+    for word in description.split():
         if "https://discord.gg/" in word:
             discord_invite_url = word
             break
