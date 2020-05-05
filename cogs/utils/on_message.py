@@ -19,7 +19,7 @@ async def on_competitive_feed_post(message: discord, bot: commands.Bot):
     )
     iso_string = parts[1]
 
-    description = "\n".join(parts[2:]).strip()
+    description = "\n".join(parts[2:]).strip().replace("> ", "")
     discord_invite_url = None
 
     for word in description.split():
