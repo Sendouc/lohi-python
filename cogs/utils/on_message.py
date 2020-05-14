@@ -8,7 +8,7 @@ from dateparser.search import search_dates
 async def on_competitive_feed_post(message: discord, bot: commands.Bot):
     comp_feed_info = bot.get_channel(ids.COMPETITIVE_FEED_INFO)
     parts = message.clean_content.strip().split("\n")
-    if len(parts) < 3:
+    if len(parts) < 2:
         await message.delete()
         await comp_feed_info.send(
             f" {message.author.mention} your message was deleted because it doesn't follow the format. Please see the pins for an example."
@@ -18,9 +18,7 @@ async def on_competitive_feed_post(message: discord, bot: commands.Bot):
     tournament_name = (
         parts[0].replace("*", "").replace("> ", "").replace("_", "").replace("`", "")
     )
-    iso_string = parts[1]
-
-    description = "\n".join(parts[2:]).strip().replace("> ", "")
+    description = "\n".join(parts[1:]).strip().replace("> ", "")
     discord_invite_url = None
 
     for word in description.split():
