@@ -59,11 +59,11 @@ async def on_competitive_feed_post(message: discord, bot: commands.Bot):
         reason = {
             IndexError: "I could not detect a date",
             ValueError: f"the date `{parts[1]}` is invalid",
-            TypeError: "you put multiple dates on one line."
+            TypeError: "you put multiple dates on one line"
         }[type(e)]
 
         await comp_feed_info.send(
-            f" {message.author.mention} your message was deleted because the date `{iso_string}` is invalid. Please see the pins for an example."
+            f" {message.author.mention} your message was deleted because {reason}. Please see the pins for an example."
         )
         return await comp_feed_info.send(f"```{message.clean_content[:1990]}```")
 
