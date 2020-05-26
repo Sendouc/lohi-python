@@ -2,12 +2,14 @@ import discord
 from discord.ext import commands
 from cogs.utils import config, ids
 import datetime
+from dateparser.search import search_dates
+import re
 
 
 async def on_competitive_feed_post(message: discord, bot: commands.Bot):
     comp_feed_info = bot.get_channel(ids.COMPETITIVE_FEED_INFO)
     parts = message.clean_content.strip().split("\n")
-    if len(parts) < 3:
+    if len(parts) < 2:
         await message.delete()
         await comp_feed_info.send(
             f" {message.author.mention} your message was deleted because it doesn't follow the format. Please see the pins for an example."
@@ -17,9 +19,7 @@ async def on_competitive_feed_post(message: discord, bot: commands.Bot):
     tournament_name = (
         parts[0].replace("*", "").replace("> ", "").replace("_", "").replace("`", "")
     )
-    iso_string = parts[1]
-
-    description = "\n".join(parts[2:]).strip().replace("> ", "")
+    description = "\n".join(parts[1:]).strip().replace("> ", "")
     discord_invite_url = None
 
     for word in description.split():
@@ -35,11 +35,36 @@ async def on_competitive_feed_post(message: discord, bot: commands.Bot):
         return await comp_feed_info.send(f"```{message.clean_content[:1990]}```")
 
     try:
-        date = datetime.datetime.fromisoformat(iso_string + "+00:00")
-    except ValueError:
+        if re.sub(r"T|\W", r"", parts[1]).isdigit():  # Using ISO string
+            date = datetime.datetime.fromisoformat(parts[1] + "+00:00")
+            description = "\n".join(parts[2:]).strip().replace("> ", "")  # Update description to remove ISO string
+        else:
+            # Get all dates
+            all_dates = []
+            for line in parts[1:]:
+                if dates := search_dates(line):
+                    all_dates += dates
+            # Remove dates that have already passed
+            possible_dates = [d for d in all_dates if d[1] > datetime.datetime.now(d[1].tzinfo)]
+            # Check if any date has specified a timezone, if so, strip dates without a timezone
+            if utc_dates := [d for d in possible_dates if d[1].tzname() == "UTC"]:  # Prioritize specifying UTC
+                possible_dates = utc_dates
+            elif tz_dates := [d for d in possible_dates if d[1].tzname()]:
+                possible_dates = tz_dates
+            # Select the date with the longest source length
+            date = sorted(possible_dates, key=lambda d: len(d[0]))[-1][1]
+
+    except (ValueError, IndexError, TypeError) as e:
         await message.delete()
+        
+        reason = {
+            IndexError: "I could not detect a date",
+            ValueError: f"the date `{parts[1]}` is invalid",
+            TypeError: "you put multiple dates on one line"
+        }[type(e)]
+
         await comp_feed_info.send(
-            f" {message.author.mention} your message was deleted because the date `{iso_string}` is invalid. Please see the pins for an example."
+            f" {message.author.mention} your message was deleted because {reason}. Please see the pins for an example."
         )
         return await comp_feed_info.send(f"```{message.clean_content[:1990]}```")
 
