@@ -11,7 +11,7 @@ from .utils.map_generator import map_generation
 from .utils.lists import maps, modes_to_emoji, itz_map_votes
 from .utils.helper import split_to_shorter_parts
 
-TOURNAMENT_URL = "InTheZone17"
+TOURNAMENT_URL = "InTheZone18"
 TOURNAMENT_PARTICIPANT_ROLE_NAME = "Registered"
 REGISTERED_ROLE_ID = 409130904418516994
 CHECKED_IN_ROLE_ID = 692878166070394950
