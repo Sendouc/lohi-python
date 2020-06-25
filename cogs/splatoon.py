@@ -170,66 +170,32 @@ class SplatoonCog(commands.Cog, name="Splatoon"):
 
     # TODO: Make 10 builds per page - needs change on the API
     @commands.command(name="wbuilds")
-    async def display_builds_of_weapon(self, ctx, *weapon_and_page):
+    async def display_builds_of_weapon(self, ctx, *weapon_words):
         """
         Searchs for builds with the given weapon.
         Example usage: .wbuilds Tenta Brella
-        Special arguments:
-        [(number)] - Shows the page corresponding the number
-        top500 - Shows top500 builds only
         """
-        page = 1
-        top500 = False
 
-        weapon_parts = []
-        for arg in weapon_and_page:
-            if "(" in arg and ")" in arg:
-                try:
-                    page = int(arg.replace("(", "").replace(")", ""))
-                    continue
-                except ValueError:
-                    return await ctx.send(
-                        f"Expected `{arg}` to be a number since it was wrapped in ( ) but it wasn't..."
-                    )
-
-            if arg.upper() == "TOP500":
-                top500 = True
-                continue
-
-            weapon_parts.append(arg)
-
-        weapon_parts_joined = " ".join(weapon_parts)
-        weapon = get_close_weapon(weapon_parts_joined)
+        weapon = get_close_weapon(" ".join(weapon_words))
         if weapon is None:
             return await ctx.send(
-                f"Sorry I'm not sure what weapon `{weapon_parts_joined}` is referring to..."
+                f"Sorry I'm not sure what weapon `{' '.join(weapon_words)}` is referring to..."
             )
 
-        builds_dict = await self.bot.api.get_builds(weapon=weapon, page=page)
-        if builds_dict is None:
-            return await ctx.send(f"{weapon} doesn't have {page} pages...")
+        builds_dict = await self.bot.api.get_builds(weapon=weapon)
         wpn_emoji = weapons_to_emoji[weapon]
-        page_count = builds_dict["pageCount"]
-        # TODO: See below.
         footer = "\uFEFF"
-        if not top500:
-            footer = f"Page {page}/{page_count}"
+        if len(builds_dict) > 10:
+            footer = f"See more builds on https://sendou.ink/"
         builds_embed = LohiEmbed(
             title=f"{wpn_emoji} {weapon} Builds",
-            url=f"https://sendou.ink/builds/{weapon.replace(' ', '_')}",
+            url=f"https://sendou.ink/builds",
             footer=footer,
         )
-        builds_embed.add_weapon_build_fields(builds_dict["builds"], top500_only=top500)
+        builds_embed.add_weapon_build_fields(builds_dict[:10])
 
         for e in builds_embed.get_embeds():
             await ctx.send(embed=e)
-
-        # TODO: Basically this is a bit bad since if there are over 20 Top 500 builds the user won't know there is another page
-        # to view but this isn't a problem that can occur just yet.
-        if page_count > page and not top500:
-            await ctx.send(
-                f"Use the command `.wbuilds {weapon_parts_joined} ({page+1})` to view the next page."
-            )
 
     @commands.command(name="maps")
     async def generate_maplist_for_scrims(self, ctx, *options):

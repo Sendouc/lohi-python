@@ -29,19 +29,14 @@ class LohiEmbed:
     def add_field(self, name="\uFEFF", value="\uFEFF", inline=True):
         self.fields.append((name, value, inline))
 
-    def add_weapon_build_fields(self, builds, top500_only=False):
+    def add_weapon_build_fields(self, builds):
         for build in builds:
-            is_top500 = build["top"]
-            if top500_only and not is_top500:
-                continue
             title = build["title"]
             discord_tag = f"{build['discord_user']['username']}#{build['discord_user']['discriminator']}"
             if title:
                 title = f"{title} by {discord_tag}"
             else:
                 title = f"{discord_tag}"
-            if is_top500:
-                title = f"{top_500_emoji} {title}"
             ability_arrs = [build["headgear"], build["clothing"], build["shoes"]]
             ability_str = ""
             for arr in ability_arrs:

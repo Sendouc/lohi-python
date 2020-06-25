@@ -8,6 +8,8 @@ from .graphql import (
     hasAccess,
     xPowers,
     addCompetitiveFeedEvent,
+    usersForAvas,
+    updateAvas,
 )
 
 # creating a new session with every request considered bad practice with aiohttp but might still be
@@ -78,13 +80,11 @@ class ApiConnecter:
     # GRAPHQL QUERIES
 
     async def get_builds(self, **kwargs) -> dict:
-        # TODO: Different query if player
-        if "discord_id" in kwargs:
-            pass
         response_dict = await self.sendou_ink_query(searchForBuildsByWeapon, kwargs)
         if response_dict is None:
             return None
-        return response_dict["searchForBuildsByWeapon"]
+
+        return response_dict["searchForBuilds"][:11]
 
     async def get_maplists(self) -> dict:
         response_dict = await self.sendou_ink_query(maplists)
@@ -103,3 +103,13 @@ class ApiConnecter:
         if response_dict is None:
             return False
         return response_dict["addCompetitiveFeedEvent"]
+
+    async def get_users_for_ava_update(self):
+        response_dict = await self.sendou_ink_query(usersForAvas)
+        return response_dict["users"]
+
+    async def update_avas(self, **kwargs) -> bool:
+        response_dict = await self.sendou_ink_query(updateAvas, kwargs)
+        if response_dict is None:
+            return False
+        return response_dict["updateAvatars"]

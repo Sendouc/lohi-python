@@ -1,24 +1,25 @@
 searchForBuildsByWeapon = """
-query searchForBuildsByWeapon($weapon: String!, $page: Int) {
-  searchForBuildsByWeapon(weapon: $weapon, page: $page) {
-    builds {
+query searchForBuilds($discord_id: String, $weapon: String) {
+    searchForBuilds(discord_id: $discord_id, weapon: $weapon) {
       id
-      discord_id
+      weapon
       title
-      top
+      description
       headgear
+      headgearItem
       clothing
+      clothingItem
       shoes
-      title
+      shoesItem
       updatedAt
+      top
       discord_user {
         username
         discriminator
+        discord_id
       }
     }
-    pageCount
   }
-}
 """
 
 searchForBuilds = """
@@ -69,5 +70,20 @@ mutation addCompetitiveFeedEvent(
       event: $event
       lohiToken: $lohiToken
     )
+  }
+"""
+
+usersForAvas = """
+{
+  users {
+    discord_id
+    avatar
+  }
+}
+"""
+
+updateAvas = """
+mutation updateAvatars($lohiToken: String!, $toUpdate: [DiscordIdAvatar!]!) {
+    updateAvatars(lohiToken: $lohiToken, toUpdate: $toUpdate)
   }
 """

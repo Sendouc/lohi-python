@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import os
 import gspread
 import pymongo
@@ -7,7 +7,7 @@ import asyncio
 from datetime import datetime
 from oauth2client.service_account import ServiceAccountCredentials
 
-from .utils import ids
+from .utils import ids, config
 from .utils.classes.VotedPlayer import VotedPlayer
 from .utils.helper import split_to_shorter_parts
 from .utils.lists import weapons
@@ -16,12 +16,58 @@ from .utils.lists import weapons
 class AdminCog(commands.Cog, name="Admin"):
     def __init__(self, bot):
         self.bot = bot
+        self.skip_loop = True
+        self.update_avatars_loop.start()
 
     async def cog_check(self, ctx):
         """ 
         Check that makes sure nobody else but me uses the commands here.
         """
         return ctx.message.author.id == ids.OWNER_ID
+
+    @tasks.loop(hours=48)
+    async def update_avatars_loop(self):
+        if self.skip_loop:
+            self.skip_loop = False
+            return
+        users = await self.bot.api.get_users_for_ava_update()
+
+        unable_to_fetch = []
+        to_update = []
+        for count, user in enumerate(users, 1):
+            discord_id = user["discord_id"]
+            avatar = user["avatar"]
+            if avatar is not None:
+                avatar = avatar.split("/")[-1].replace(".", "")
+
+            fetched_user = self.bot.get_user(discord_id)
+            if fetched_user is None:
+                fetched_user = await self.bot.fetch_user(discord_id)
+                if fetched_user is None:
+                    unable_to_fetch.append(discord_id)
+                    continue
+
+            if fetched_user.avatar is not None and fetched_user.avatar != avatar:
+                to_update.append(
+                    {"discordId": discord_id, "avatar": fetched_user.avatar}
+                )
+
+            print(f"{count}/{len(users)}")
+
+        params = {"lohiToken": config.LOHI_TOKEN, "toUpdate": to_update}
+        result = await self.bot.api.update_avas(**params)
+
+        msg = ""
+        if not result:
+            msg += "Something went wrong with updating avatars..."
+        else:
+            msg += f"Successfully updated {len(to_update)} avatars - including https://sendou.ink/u/{to_update[0]['discordId']}"
+
+        owner = self.bot.get_user(ids.OWNER_ID)
+        if not owner:
+            owner = await self.bot.fetch_user(ids.OWNER_ID)
+
+        await owner.send(msg)
 
     @commands.command(name="test")
     async def test_command(self, ctx):
